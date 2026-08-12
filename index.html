@@ -82,6 +82,8 @@
   .month-card::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;
     background:linear-gradient(90deg,transparent,var(--glass-hi) 40%,var(--glass-hi) 60%,transparent);pointer-events:none;}
   .month-card.open{box-shadow:0 8px 24px -10px rgba(0,0,0,.4);}
+  .archive-card{border:1.5px solid var(--accent);}
+  .archive-card > .month-row .month-name{color:var(--accent);}
   .month-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;transition:transform .12s var(--spring);}
   .month-row:active{transform:scale(.98);}
   .month-name{font-size:16px;font-weight:600;}
@@ -236,7 +238,6 @@
     <p class="totals-title">Year total — <span id="totalsYear"></span></p>
     <div class="totals-line"><span>Income</span><b id="totIncome">0</b></div>
     <div class="totals-line" id="totTransferLine" style="display:none;"><span>Transfers in</span><b id="totTransfer">0</b></div>
-    <div class="totals-line"><span>Expenses</span><b id="totExpense">0</b></div>
     <div id="totCatLines"></div>
     <div class="totals-line final"><span>Net balance</span><b id="totBalance">0</b></div>
   </div>
@@ -267,6 +268,13 @@
   <div class="modal-actions"><button class="btn-cancel" id="closeAddYear">Cancel</button><button class="btn-save" id="saveAddYear">Add</button></div>
 </div></div>
 
+<div class="modal-backdrop" id="addMonthModal"><div class="modal">
+  <h2 class="serif">Add a month</h2>
+  <p style="font-size:12.5px;color:var(--dark-soft);margin:-6px 0 14px;line-height:1.5;">Current and previous month always show at the top. Anything else lands in "Older months" below \u2014 useful for backfilling a past month or getting a head start on next month.</p>
+  <div class="field"><label>Month</label><select id="addMonthSelect" style="flex:1;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:8px;font-size:14px;font-family:inherit;color:var(--dark-ink);"></select></div>
+  <div class="modal-actions"><button class="btn-cancel" id="closeAddMonth">Cancel</button><button class="btn-save" id="saveAddMonth">Add</button></div>
+</div></div>
+
 <div class="modal-backdrop" id="addAccountModal"><div class="modal">
   <h2 class="serif">Add an account</h2>
   <div class="field"><label>Name</label><input type="text" id="newAccountInput" placeholder="e.g. Travel Fund" style="width:160px;text-align:left;"></div>
@@ -286,7 +294,8 @@
 
 <script>
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const STORE_KEY = "ledger-data-v3";
+const STORE_KEY = "ledger-data-v4";
+const OLD_KEY_V3 = "ledger-data-v3";
 const OLD_KEY = "ledger-data-v2";
 
 function rnd(seed){ const x=Math.sin(seed*999)*10000; return x-Math.floor(x); }
@@ -381,8 +390,8 @@ function defaultState(){
   const y = new Date().getFullYear();
   const mainId=uid(), savId=uid();
   return { accounts:{
-    [mainId]: { name:'Main', theme:'nyc', years:{[y]:{months:{}}}, categories: freshCategories() },
-    [savId]: { name:'Savings', theme:'sakura', years:{[y]:{months:{}}}, categories: freshCategories() }
+    [mainId]: { name:'Main', theme:'nyc', years:{[y]:{months:{}, visible:[]}}, categories: freshCategories() },
+    [savId]: { name:'Savings', theme:'sakura', years:{[y]:{months:{}, visible:[]}}, categories: freshCategories() }
   }, currentAccountId: mainId };
 }
 
@@ -407,12 +416,37 @@ function migrateV2(v2){
   return { accounts, currentAccountId: v2.currentAccountId || Object.keys(accounts)[0] };
 }
 
+function migrateV3(v3){
+  const accounts={};
+  Object.entries(v3.accounts).forEach(([id,acc])=>{
+    let needGenExp=false;
+    Object.values(acc.years||{}).forEach(yd=>{
+      Object.values(yd.months||{}).forEach(md=>{ if((md.expense||0)>0) needGenExp=true; });
+    });
+    const categories = needGenExp ? [...acc.categories, {id:'genexp', name:'General expenses', linkTo:null}] : acc.categories;
+    const years={};
+    Object.entries(acc.years||{}).forEach(([yr,yd])=>{
+      const months={};
+      Object.entries(yd.months||{}).forEach(([mo,md])=>{
+        const cats={...(md.cats||{})};
+        if(needGenExp && (md.expense||0)>0) cats['genexp']=md.expense;
+        months[mo]={ incomes:[{id:uid(), name:'Income', amount:md.income||0}], cats };
+      });
+      years[yr]={months, visible:[]};
+    });
+    accounts[id]={ name:acc.name, theme:acc.theme, years, categories };
+  });
+  return { accounts, currentAccountId: v3.currentAccountId || Object.keys(accounts)[0], security: v3.security };
+}
+
 function loadState(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
     if(raw) return JSON.parse(raw);
+    const v3 = localStorage.getItem(OLD_KEY_V3);
+    if(v3) return migrateV3(JSON.parse(v3));
     const old = localStorage.getItem(OLD_KEY);
-    if(old) return migrateV2(JSON.parse(old));
+    if(old) return migrateV3(migrateV2(JSON.parse(old)));
   }catch(e){ console.warn('Storage unavailable, using in-memory only', e); }
   return defaultState();
 }
@@ -422,18 +456,21 @@ function saveStateDebounced(){ clearTimeout(saveTimer); saveTimer=setTimeout(sav
 function account(id){ return state.accounts[id||currentAccountId]; }
 function theme(id){ return THEME_BY_KEY[account(id).theme] || THEMES[0]; }
 
+function freshMonth(){ return { incomes:[{id:uid(), name:'Income', amount:0}], cats:{} }; }
+
 function monthData(accId, year, month){
   const acc = account(accId);
   const y = acc.years[year] || (acc.years[year]={months:{}});
-  return y.months[month] || (y.months[month]={income:0, expense:0, cats:{}});
+  return y.months[month] || (y.months[month]=freshMonth());
 }
 
+function monthIncomeTotal(m){ return (m.incomes||[]).reduce((s,r)=>s+(r.amount||0),0); }
 function catAmount(m,catId){ return (m.cats && m.cats[catId]) || 0; }
 
 function monthOwnBalance(m, categories){
-  let deduct = m.expense||0;
+  let deduct = 0;
   categories.forEach(c=> deduct += catAmount(m,c.id));
-  return (m.income||0) - deduct;
+  return monthIncomeTotal(m) - deduct;
 }
 
 function transfersIntoMonth(targetAccId, year, month){
@@ -464,10 +501,15 @@ function computeHighlights(accId, year, month, m){
   const transferCats = acc.categories.filter(c=>c.linkTo);
 
   const items=[];
-  if(m.expense>0) items.push({name:'General expenses', val:m.expense});
   spendCats.forEach(c=>{ const v=catAmount(m,c.id); if(v>0) items.push({name:c.name, val:v}); });
   const hl=[];
   if(items.length){ items.sort((a,b)=>b.val-a.val); hl.push({cls:'', text:'Biggest spend: '+items[0].name+' (\u20b9'+fmt(items[0].val)+')'}); }
+
+  const incomeRows=(m.incomes||[]).filter(r=>r.amount>0);
+  if(incomeRows.length>1){
+    const sorted=[...incomeRows].sort((a,b)=>b.amount-a.amount);
+    hl.push({cls:'win', text:'Biggest income: '+sorted[0].name+' (\u20b9'+fmt(sorted[0].amount)+')'});
+  }
 
   transferCats.forEach(c=>{
     const v=catAmount(m,c.id);
@@ -503,7 +545,7 @@ function renderAccountSwitcher(){
     const b=document.createElement('button');
     b.className='seg-btn'+(id===currentAccountId?' active':'');
     b.textContent = state.accounts[id].name;
-    b.onclick=()=>{ if(id===currentAccountId) return; haptic(); currentAccountId=id; currentYear=Object.keys(account().years).sort().pop(); renderStructural(); };
+    b.onclick=()=>{ if(id===currentAccountId) return; haptic(); currentAccountId=id; currentYear=realNow().year; renderStructural(); };
     el.appendChild(b);
   });
 }
@@ -523,14 +565,38 @@ function renderYearTabs(){
   el.appendChild(addBtn);
 }
 
+function realNow(){
+  const now=new Date();
+  const monthIdx=now.getMonth();
+  const year=String(now.getFullYear());
+  const month=MONTHS[monthIdx];
+  const prevMonthIdx = monthIdx===0 ? 11 : monthIdx-1;
+  const prevYear = monthIdx===0 ? String(now.getFullYear()-1) : year;
+  const prevMonth = MONTHS[prevMonthIdx];
+  return {year, month, prevYear, prevMonth};
+}
+function isRealCurrent(year, month){ const r=realNow(); return year===r.year && month===r.month; }
+function isRealPrevious(year, month){ const r=realNow(); return year===r.prevYear && month===r.prevMonth; }
+
+function ensureCurrentPrevious(){
+  const r = realNow();
+  Object.values(state.accounts).forEach(acc=>{
+    [[r.year,r.month],[r.prevYear,r.prevMonth]].forEach(([yr,mo])=>{
+      const y = acc.years[yr] || (acc.years[yr]={months:{}});
+      if(!y.months[mo]) y.months[mo]=freshMonth();
+    });
+  });
+}
+
 function buildMonthCard(month){
   const acc=account(); const m=monthData(currentAccountId,currentYear,month);
   const tf = transfersIntoMonth(currentAccountId, currentYear, month);
   const bal = monthOwnBalance(m, acc.categories) + tf.total;
+  const autoOpen = isRealCurrent(currentYear, month);
 
-  const card=document.createElement('div'); card.className='month-card';
+  const card=document.createElement('div'); card.className='month-card'+(autoOpen?' open':'');
   const row=document.createElement('div'); row.className='month-row';
-  row.innerHTML=`<div><div class="month-name">${month}</div><div class="month-meta" data-role="meta">Income ${fmt(m.income)}</div></div>
+  row.innerHTML=`<div><div class="month-name">${month}</div><div class="month-meta" data-role="meta">Income ${fmt(monthIncomeTotal(m))}</div></div>
     <div class="month-right"><span class="chip ${bal>=0?'pos':'neg'}" data-role="chip">${bal>=0?'+':'\u2212'}${fmt(Math.abs(bal))}</span><span class="chevron"></span></div>`;
   row.onclick=()=>{ haptic(); card.classList.toggle('open'); };
 
@@ -540,32 +606,90 @@ function buildMonthCard(month){
   const hlDiv = document.createElement('div'); hlDiv.className='highlights'; hlDiv.setAttribute('data-role','highlights');
 
   const fg=document.createElement('div'); fg.className='field-grid';
-  let fieldsHtml = `
-    <div class="field"><label>Income received</label><input type="number" inputmode="decimal" value="${m.income||''}" data-k="income"></div>`;
+  const incomeWrap=document.createElement('div');
+  incomeWrap.innerHTML = `<div class="field" style="margin-bottom:0;"><label style="font-weight:600;color:var(--ink);">Income</label></div>`;
+  const incomeRowsEl=document.createElement('div'); incomeRowsEl.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:6px;';
+  incomeWrap.appendChild(incomeRowsEl);
+  const addIncomeBtn=document.createElement('button');
+  addIncomeBtn.className='add-cat-btn'; addIncomeBtn.style.marginTop='8px'; addIncomeBtn.style.width='100%';
+  addIncomeBtn.textContent='+ Add income source';
+  incomeWrap.appendChild(addIncomeBtn);
+  fg.appendChild(incomeWrap);
+
   if(tf.total>0){
-    fieldsHtml += `<div class="field readonly"><label>Transfers in (${tf.sources.join(', ')})</label><span class="readonly-val" data-role="tfval">${fmt(tf.total)}</span></div>`;
+    const tfDiv=document.createElement('div'); tfDiv.className='field readonly';
+    tfDiv.innerHTML=`<label>Transfers in (${tf.sources.join(', ')})</label><span class="readonly-val" data-role="tfval">${fmt(tf.total)}</span>`;
+    fg.appendChild(tfDiv);
   }
-  fieldsHtml += `<div class="field"><label>Money spent</label><input type="number" inputmode="decimal" value="${m.expense||''}" data-k="expense"></div>`;
-  if(acc.categories.length){ fieldsHtml += `<div class="divider"></div>`; }
+
+  const divider1=document.createElement('div'); divider1.className='divider'; fg.appendChild(divider1);
+  const spentDiv=document.createElement('div'); spentDiv.className='field readonly';
+  spentDiv.innerHTML=`<label>Money spent<br><span style="font-size:11px;">Auto-totalled from categories below</span></label><span class="readonly-val" data-role="spentval" style="color:var(--debit);">${fmt(0)}</span>`;
+  fg.appendChild(spentDiv);
+
+  if(acc.categories.length){ const d2=document.createElement('div'); d2.className='divider'; fg.appendChild(d2); }
   acc.categories.forEach(c=>{
     const linkLabel = c.linkTo && state.accounts[c.linkTo] ? ` \u2192 ${state.accounts[c.linkTo].name}` : '';
-    fieldsHtml += `<div class="field"><label>${c.name}${linkLabel}</label><input type="number" inputmode="decimal" value="${catAmount(m,c.id)||''}" data-k="cat" data-cat="${c.id}"></div>`;
+    const catDiv=document.createElement('div'); catDiv.className='field';
+    catDiv.innerHTML=`<label>${c.name}${linkLabel}</label><input type="number" inputmode="decimal" value="${catAmount(m,c.id)||''}" data-k="cat" data-cat="${c.id}">`;
+    fg.appendChild(catDiv);
   });
-  fieldsHtml += `<div class="result-row"><span class="label">Remaining balance</span><span class="val" data-role="result">${fmt(bal)}</span></div>`;
-  fg.innerHTML = fieldsHtml;
+  const resultDiv=document.createElement('div'); resultDiv.className='result-row';
+  resultDiv.innerHTML=`<span class="label">Remaining balance</span><span class="val" data-role="result">${fmt(bal)}</span>`;
+  fg.appendChild(resultDiv);
+
+  const deleteBtn=document.createElement('button');
+  deleteBtn.textContent='Delete this month';
+  deleteBtn.style.cssText='width:100%;margin-top:14px;padding:10px;border-radius:10px;border:none;background:var(--debit-soft);color:var(--debit);font-size:13px;font-weight:600;font-family:inherit;';
+  deleteBtn.onclick=(e)=>{
+    e.stopPropagation();
+    if(!confirm(`Delete ${month}'s data? This can\u2019t be undone.`)) return;
+    haptic(true);
+    const y=account().years[currentYear];
+    delete y.months[month];
+    saveStateNow(); renderMonthList(); renderHero(); renderTotals();
+  };
+  fg.appendChild(deleteBtn);
 
   inner.appendChild(hlDiv); inner.appendChild(fg);
   body.appendChild(inner);
 
   const refs={ chipEl:row.querySelector('[data-role="chip"]'), metaEl:row.querySelector('[data-role="meta"]'),
-    resultEl:fg.querySelector('[data-role="result"]'), highlightsEl:hlDiv };
+    resultEl:fg.querySelector('[data-role="result"]'), highlightsEl:hlDiv, spentEl:fg.querySelector('[data-role="spentval"]') };
 
-  fg.querySelectorAll('input').forEach(inp=>{
+  function renderIncomeRows(){
+    incomeRowsEl.innerHTML='';
+    (m.incomes||[]).forEach(inc=>{
+      const r=document.createElement('div'); r.style.cssText='display:flex;align-items:center;gap:8px;';
+      r.innerHTML=`<input type="text" value="${inc.name}" data-role="incname" style="flex:1;text-align:left;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 10px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark-ink);">
+        <input type="number" inputmode="decimal" value="${inc.amount||''}" data-role="incamt" style="width:100px;text-align:right;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 10px;font-size:15px;font-variant-numeric:tabular-nums;font-family:inherit;background:#fff;color:var(--dark-ink);">
+        <button data-role="incremove" style="width:32px;height:32px;flex-shrink:0;border-radius:8px;border:none;background:var(--debit-soft);color:var(--debit);font-weight:700;font-family:inherit;">\u00d7</button>`;
+      r.querySelector('[data-role="incname"]').addEventListener('input', e=>{ inc.name=e.target.value; saveStateDebounced(); });
+      r.querySelector('[data-role="incamt"]').addEventListener('input', e=>{
+        inc.amount=parseFloat(e.target.value)||0;
+        updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
+      });
+      r.querySelector('[data-role="incremove"]').addEventListener('click', e=>{
+        e.stopPropagation(); haptic();
+        if(m.incomes.length<=1) return;
+        m.incomes = m.incomes.filter(x=>x.id!==inc.id);
+        renderIncomeRows(); updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
+      });
+      incomeRowsEl.appendChild(r);
+    });
+  }
+  renderIncomeRows();
+  addIncomeBtn.onclick=(e)=>{
+    e.stopPropagation(); haptic();
+    if(!m.incomes) m.incomes=[];
+    m.incomes.push({id:uid(), name:'Income source', amount:0});
+    renderIncomeRows(); updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
+  };
+
+  fg.querySelectorAll('input[data-k]').forEach(inp=>{
     inp.addEventListener('input',(e)=>{
       const k=e.target.dataset.k; const v=parseFloat(e.target.value)||0;
-      if(k==='income') m.income=v;
-      else if(k==='expense') m.expense=v;
-      else if(k==='cat'){ if(!m.cats) m.cats={}; m.cats[e.target.dataset.cat]=v; }
+      if(k==='cat'){ if(!m.cats) m.cats={}; m.cats[e.target.dataset.cat]=v; }
       updateMonthCardLive(month, refs, m);
       renderHero(); renderTotals();
       saveStateDebounced();
@@ -573,21 +697,56 @@ function buildMonthCard(month){
   });
 
   updateHighlights(month, refs, m);
+  updateMonthCardLive(month, refs, m);
   card.appendChild(row);
   card.appendChild(body);
   return {card, refs};
 }
 
+function buildOlderMonthsArchive(months){
+  const wrap=document.createElement('div'); wrap.className='month-card archive-card';
+  const row=document.createElement('div'); row.className='month-row';
+  row.innerHTML=`<div><div class="month-name">Older months</div><div class="month-meta">${months.length} month${months.length>1?'s':''} \u00b7 tap to browse</div></div>
+    <div class="month-right"><span class="chevron"></span></div>`;
+  row.onclick=()=>{ haptic(); wrap.classList.toggle('open'); };
+  const body=document.createElement('div'); body.className='month-body';
+  const inner=document.createElement('div'); inner.className='month-body-inner';
+  const listInner=document.createElement('div'); listInner.style.cssText='display:flex;flex-direction:column;gap:10px;padding:6px 16px 16px;';
+  months.forEach(mo=>{
+    const {card,refs}=buildMonthCard(mo);
+    monthCardRefs[mo]=refs;
+    listInner.appendChild(card);
+  });
+  inner.appendChild(listInner);
+  body.appendChild(inner);
+  wrap.appendChild(row); wrap.appendChild(body);
+  return wrap;
+}
+
 function renderMonthList(){
   const list=document.getElementById('monthList'); list.innerHTML=''; monthCardRefs={};
   const acc=account(); const y=acc.years[currentYear]||{months:{}};
-  const used=MONTHS.filter(mm=>y.months[mm]);
-  if(used.length===0){ list.innerHTML=`<div class="empty">No months added yet for ${currentYear}.<br>Tap "Add a month" to start.</div>`; }
-  used.forEach(month=>{ const {card,refs}=buildMonthCard(month); monthCardRefs[month]=refs; list.appendChild(card); });
-  document.getElementById('addMonthBtn').style.display = used.length<12 ? 'block' : 'none';
+  const allMonths = MONTHS.filter(mm=>y.months[mm]);
+  const currentM = allMonths.find(mm=>isRealCurrent(currentYear,mm));
+  const previousM = allMonths.find(mm=>isRealPrevious(currentYear,mm));
+  const olderMonths = allMonths.filter(mm=>mm!==currentM && mm!==previousM).sort((a,b)=>MONTHS.indexOf(b)-MONTHS.indexOf(a));
+
+  if(!currentM && !previousM && !olderMonths.length){
+    list.innerHTML=`<div class="empty">No months added yet for ${currentYear}.<br>Tap "Add a month" to start.</div>`;
+  }
+  if(currentM){ const {card,refs}=buildMonthCard(currentM); monthCardRefs[currentM]=refs; list.appendChild(card); }
+  if(previousM){ const {card,refs}=buildMonthCard(previousM); monthCardRefs[previousM]=refs; list.appendChild(card); }
+  if(olderMonths.length){ list.appendChild(buildOlderMonthsArchive(olderMonths)); }
+
+  const existing = new Set(allMonths);
+  document.getElementById('addMonthBtn').style.display = existing.size<12 ? 'block' : 'none';
   document.getElementById('addMonthBtn').onclick=()=>{
-    const remaining=MONTHS.filter(mm=>!y.months[mm]); if(!remaining.length) return;
-    haptic(true); monthData(currentAccountId,currentYear,remaining[0]); saveStateNow(); renderMonthList(); renderTotals();
+    const sel=document.getElementById('addMonthSelect'); sel.innerHTML='';
+    MONTHS.filter(mm=>!existing.has(mm)).forEach(mm=>{
+      const opt=document.createElement('option'); opt.value=mm; opt.textContent=mm;
+      sel.appendChild(opt);
+    });
+    document.getElementById('addMonthModal').classList.add('show');
   };
 }
 
@@ -596,10 +755,12 @@ function renderMonthList(){
 function updateMonthCardLive(month, refs, m){
   const acc=account(); const tf=transfersIntoMonth(currentAccountId,currentYear,month);
   const bal = monthOwnBalance(m, acc.categories) + tf.total;
+  let spent=0; acc.categories.forEach(c=> spent+=catAmount(m,c.id));
   refs.chipEl.textContent=(bal>=0?'+':'\u2212')+fmt(Math.abs(bal));
   refs.chipEl.className='chip bump '+(bal>=0?'pos':'neg');
   setTimeout(()=>refs.chipEl.classList.remove('bump'),200);
-  refs.metaEl.textContent='Income '+fmt(m.income);
+  refs.metaEl.textContent='Income '+fmt(monthIncomeTotal(m));
+  if(refs.spentEl) refs.spentEl.textContent=fmt(spent);
   refs.resultEl.textContent=fmt(bal);
   refs.resultEl.style.color = bal>=0 ? 'var(--credit)' : 'var(--debit)';
   updateHighlights(month, refs, m);
@@ -611,11 +772,10 @@ function updateHighlights(month, refs, m){
 }
 
 function renderHero(){
-  const acc=account(); const y=acc.years[currentYear]||{months:{}};
+  const acc=account(); const y=acc.years[currentYear]||{months:{}, visible:[]};
   let income=0, out=0, transfers=0, sourceNames=new Set();
   Object.entries(y.months).forEach(([mo,m])=>{
-    income += m.income||0;
-    out += m.expense||0;
+    income += monthIncomeTotal(m);
     acc.categories.forEach(c=> out += catAmount(m,c.id));
     const tf = transfersIntoMonth(currentAccountId, currentYear, mo);
     transfers += tf.total; tf.sources.forEach(s=>sourceNames.add(s));
@@ -630,25 +790,24 @@ function renderHero(){
 }
 
 function renderTotals(){
-  const acc=account(); const y=acc.years[currentYear]||{months:{}};
+  const acc=account(); const y=acc.years[currentYear]||{months:{}, visible:[]};
   const months=Object.entries(y.months);
   if(!months.length){ document.getElementById('totalsCard').style.display='none'; return; }
   document.getElementById('totalsCard').style.display='block';
   document.getElementById('totalsYear').textContent=currentYear;
-  let income=0, expense=0, transfers=0; const catTotals={};
+  let income=0, transfers=0; const catTotals={};
   acc.categories.forEach(c=> catTotals[c.id]=0);
   months.forEach(([mo,m])=>{
-    income+=m.income||0; expense+=m.expense||0;
+    income+=monthIncomeTotal(m);
     acc.categories.forEach(c=> catTotals[c.id]+=catAmount(m,c.id));
     transfers += transfersIntoMonth(currentAccountId,currentYear,mo).total;
   });
   document.getElementById('totIncome').textContent=fmt(income);
   const tline=document.getElementById('totTransferLine');
   if(transfers>0){ tline.style.display='flex'; document.getElementById('totTransfer').textContent=fmt(transfers); } else tline.style.display='none';
-  document.getElementById('totExpense').textContent=fmt(expense);
   const catLinesEl=document.getElementById('totCatLines');
   catLinesEl.innerHTML = acc.categories.map(c=>`<div class="totals-line"><span>${c.name}</span><b>${fmt(catTotals[c.id])}</b></div>`).join('');
-  let deduct=expense; acc.categories.forEach(c=> deduct+=catTotals[c.id]);
+  let deduct=0; acc.categories.forEach(c=> deduct+=catTotals[c.id]);
   document.getElementById('totBalance').textContent=fmt(income+transfers-deduct);
 }
 
@@ -665,8 +824,18 @@ function renderStructural(){
 document.getElementById('closeAddYear').onclick=()=>document.getElementById('addYearModal').classList.remove('show');
 document.getElementById('saveAddYear').onclick=()=>{
   const val=document.getElementById('newYearInput').value.trim(); if(!val) return;
-  if(!account().years[val]) account().years[val]={months:{}};
+  if(!account().years[val]) account().years[val]={months:{}, visible:[]};
   currentYear=val; saveStateNow(); document.getElementById('addYearModal').classList.remove('show'); renderStructural();
+};
+
+document.getElementById('closeAddMonth').onclick=()=>document.getElementById('addMonthModal').classList.remove('show');
+document.getElementById('saveAddMonth').onclick=()=>{
+  const mo=document.getElementById('addMonthSelect').value; if(!mo) return;
+  haptic(true);
+  monthData(currentAccountId,currentYear,mo);
+  saveStateNow();
+  document.getElementById('addMonthModal').classList.remove('show');
+  renderMonthList(); renderHero(); renderTotals();
 };
 
 /* ---------- modals: add account ---------- */
@@ -692,7 +861,7 @@ document.getElementById('closeAddAccount').onclick=()=>document.getElementById('
 document.getElementById('saveAddAccount').onclick=()=>{
   const name=document.getElementById('newAccountInput').value.trim(); if(!name) return;
   const id=uid(); const y=new Date().getFullYear();
-  state.accounts[id]={ name, theme:pendingNewTheme, years:{[y]:{months:{}}}, categories: freshCategories() };
+  state.accounts[id]={ name, theme:pendingNewTheme, years:{[y]:{months:{}, visible:[]}}, categories: freshCategories() };
   currentAccountId=id; currentYear=String(y);
   saveStateNow(); document.getElementById('addAccountModal').classList.remove('show'); renderStructural();
 };
@@ -815,8 +984,10 @@ document.getElementById('pinInput').addEventListener('keydown', e=>{ if(e.key===
   Object.values(state.accounts).forEach((a,i)=>{
     if(!THEME_BY_KEY[a.theme]) a.theme = OLD_THEME_MAP[a.theme] || THEMES[i%THEMES.length].key;
   });
+  ensureCurrentPrevious();
+  saveStateNow();
   currentAccountId = state.currentAccountId || Object.keys(state.accounts)[0];
-  currentYear = Object.keys(account().years).sort().pop();
+  currentYear = realNow().year;
   renderStructural();
   if(state.security.pinHash){ document.getElementById('lockOverlay').style.display='flex'; }
 })();
