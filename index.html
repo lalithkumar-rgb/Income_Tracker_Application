@@ -15,6 +15,8 @@
     --dark-ink:#1C2420; --dark-soft:#5B6B63;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  button{transition:transform .12s var(--spring);}
+  button:active{transform:scale(.95);}
   html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;overflow-x:hidden;}
@@ -140,7 +142,11 @@
     color:var(--dark-ink);position:relative;
     padding:32px 20px calc(env(safe-area-inset-bottom,0px) + 20px);max-height:82vh;overflow-y:auto;
     transform:translateY(30px);transition:transform .3s var(--spring);}
-  .modal::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:36px;height:4px;border-radius:2px;background:rgba(0,0,0,.18);}
+  .modal::before{content:none;}
+  .modal-handle{position:absolute;top:0;left:0;right:0;height:34px;display:flex;align-items:flex-start;justify-content:center;
+    padding-top:9px;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:grab;}
+  .modal-handle::after{content:"";width:36px;height:4px;border-radius:2px;background:rgba(0,0,0,.18);}
+  .modal-backdrop{overscroll-behavior:contain;}
   .modal-backdrop.show .modal{transform:translateY(0);}
   .modal h2{font-size:17px;margin:0 0 14px;color:var(--dark-ink);}
   .modal .field label{color:var(--dark-soft);}
@@ -151,12 +157,13 @@
   .btn-cancel{background:#EEF0F1;color:var(--dark-soft);}
   .btn-save{background:var(--dark-ink);color:#fff;}
 
-  .cat-row{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+  .cat-row{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;transition:transform .12s;}
+  .cat-row.dragging{-webkit-user-select:none;user-select:none;}
   .cat-row-top{display:flex;align-items:center;gap:8px;}
   .cat-row-top input[type=text]{flex:1;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:7px 9px;font-size:14px;font-family:inherit;color:var(--dark-ink);}
   .cat-remove{width:28px;height:28px;border-radius:8px;border:none;background:var(--debit-soft);color:#B23A32;font-weight:700;font-family:inherit;}
-  .cat-drag{width:30px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;letter-spacing:-2px;
-    color:var(--dark-soft);cursor:grab;touch-action:none;flex-shrink:0;user-select:none;}
+  .cat-drag{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;letter-spacing:-2px;
+    color:var(--dark-soft);cursor:grab;touch-action:none;flex-shrink:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;}
   .cat-row.dragging{opacity:.6;box-shadow:0 6px 16px rgba(0,0,0,.25);position:relative;z-index:5;}
   .cat-row select{width:100%;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit;color:var(--dark-soft);background:#fff;}
   .add-cat-btn{padding:10px;border-radius:10px;border:1.5px dashed rgba(0,0,0,.18);background:transparent;color:var(--dark-soft);font-size:13px;font-family:inherit;}
@@ -243,40 +250,47 @@
     <p class="totals-title">Year total — <span id="totalsYear"></span></p>
     <div class="totals-line"><span>Income</span><b id="totIncome">0</b></div>
     <div class="totals-line" id="totTransferLine" style="display:none;"><span>Transfers in</span><b id="totTransfer">0</b></div>
-    <div class="totals-line" id="totExpenseRow" style="cursor:pointer;">
-      <span>Expenses <span id="expChevron" style="display:inline-block;transition:transform .2s;font-size:10px;">▾</span></span><b id="totExpense">0</b>
+    <div class="totals-line" id="totExpenseRow" style="cursor:pointer;padding:10px 0;">
+      <span>Expenses <span id="expChevron" style="display:inline-block;transition:transform .2s;font-size:19px;line-height:0;position:relative;top:3px;margin-left:2px;">▾</span></span><b id="totExpense">0</b>
     </div>
     <div id="totCatLines" style="display:none;padding-left:14px;"></div>
     <div class="totals-line final"><span>Net balance</span><b id="totBalance">0</b></div>
   </div>
 
   <p class="storage-note">Everything is stored only on this device. No data ever leaves your phone.</p>
+
+  <div id="undoToast" style="display:none;position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:60;
+    max-width:398px;margin:0 auto;background:#1C2420;color:#fff;border-radius:14px;padding:13px 16px;align-items:center;justify-content:space-between;gap:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);">
+    <span id="undoToastText" style="font-size:13px;flex:1;"></span>
+    <button id="undoToastBtn" style="background:none;border:none;color:var(--accent,#F4C97A);font-weight:700;font-size:13.5px;font-family:inherit;flex-shrink:0;">Undo</button>
+  </div>
   <div class="privacy-links">
     <button class="lock-link" id="lockSettingsBtn">App passcode</button>
   </div>
 </div>
 
-<div class="modal-backdrop" id="lockModal"><div class="modal">
+<div class="modal-backdrop" id="lockModal"><div class="modal"><div class="modal-handle"></div>
   <h2 class="serif" id="lockModalTitle">Set a passcode</h2>
   <p style="font-size:12.5px;color:var(--ink-soft);margin:-6px 0 14px;line-height:1.5;">This adds a simple passcode screen so someone glancing at your phone can't casually open the app. It isn't encryption \u2014 your real protection is your iPhone's own passcode / Face ID, which already keeps this page from opening on a locked phone.</p>
   <div id="lockModalBody"></div>
   <div class="modal-actions"><button class="btn-cancel" id="closeLockModal">Cancel</button><button class="btn-save" id="saveLockModal">Save</button></div>
 </div></div>
 
-<div class="modal-backdrop" id="settingsModal"><div class="modal">
+<div class="modal-backdrop" id="settingsModal"><div class="modal"><div class="modal-handle"></div>
   <h2 class="serif">Recurring categories</h2>
   <div class="field-grid" id="recurringFields"></div>
   <button class="add-cat-btn" id="addCatBtn" style="margin-top:4px;">+ Add category</button>
   <div class="modal-actions"><button class="btn-cancel" id="closeSettings">Cancel</button><button class="btn-save" id="saveSettings">Save</button></div>
 </div></div>
 
-<div class="modal-backdrop" id="addYearModal"><div class="modal">
+<div class="modal-backdrop" id="addYearModal"><div class="modal"><div class="modal-handle"></div>
   <h2 class="serif">Add a year</h2>
   <div class="field"><label>Year</label><input type="number" id="newYearInput" placeholder="2027" style="width:100px;text-align:right;"></div>
   <div class="modal-actions"><button class="btn-cancel" id="closeAddYear">Cancel</button><button class="btn-save" id="saveAddYear">Add</button></div>
 </div></div>
 
-<div class="modal-backdrop" id="addAccountModal"><div class="modal">
+<div class="modal-backdrop" id="addAccountModal"><div class="modal"><div class="modal-handle"></div>
   <h2 class="serif">Add an account</h2>
   <div class="field"><label>Name</label><input type="text" id="newAccountInput" placeholder="e.g. Travel Fund" style="width:160px;text-align:left;"></div>
   <p style="font-size:12px;color:var(--ink-soft);margin:14px 0 6px;">Theme</p>
@@ -284,7 +298,7 @@
   <div class="modal-actions"><button class="btn-cancel" id="closeAddAccount">Cancel</button><button class="btn-save" id="saveAddAccount">Add</button></div>
 </div></div>
 
-<div class="modal-backdrop" id="editAccountModal"><div class="modal">
+<div class="modal-backdrop" id="editAccountModal"><div class="modal"><div class="modal-handle"></div>
   <h2 class="serif">Edit account</h2>
   <div class="field"><label>Name</label><input type="text" id="editAccountInput" style="width:160px;text-align:left;"></div>
   <p style="font-size:12px;color:var(--ink-soft);margin:14px 0 6px;">Theme</p>
@@ -457,7 +471,7 @@ function saveStateDebounced(){ clearTimeout(saveTimer); saveTimer=setTimeout(sav
 function account(id){ return state.accounts[id||currentAccountId]; }
 function theme(id){ return THEME_BY_KEY[account(id).theme] || THEMES[0]; }
 
-function freshMonth(){ return { incomes:[{id:uid(), name:'Income', amount:0}], cats:{} }; }
+function freshMonth(){ return { incomes:[], cats:{} }; }
 
 function monthData(accId, year, month){
   const acc = account(accId);
@@ -562,7 +576,7 @@ function renderYearTabs(){
   });
   const addBtn=document.createElement('button');
   addBtn.className='year-pill add'; addBtn.textContent='+ Year';
-  addBtn.onclick=()=>{ document.getElementById('newYearInput').value=''; document.getElementById('addYearModal').classList.add('show'); };
+  addBtn.onclick=()=>{ document.getElementById('newYearInput').value=''; openModal('addYearModal'); };
   el.appendChild(addBtn);
 }
 
@@ -614,7 +628,8 @@ function buildMonthCard(month){
 
   const fg=document.createElement('div'); fg.className='field-grid';
   const incomeWrap=document.createElement('div');
-  incomeWrap.innerHTML = `<div class="field" style="margin-bottom:0;"><label style="font-weight:600;color:var(--ink);">Income</label></div>`;
+  incomeWrap.innerHTML = `<div class="field" style="margin-bottom:0;"><label style="font-weight:600;color:var(--ink);">Income</label></div>
+    <p data-role="incomehint" style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;"></p>`;
   const incomeRowsEl=document.createElement('div'); incomeRowsEl.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:6px;';
   incomeWrap.appendChild(incomeRowsEl);
   const addIncomeBtn=document.createElement('button');
@@ -653,11 +668,17 @@ function buildMonthCard(month){
 
   function renderIncomeRows(){
     incomeRowsEl.innerHTML='';
+    const hintEl = incomeWrap.querySelector('[data-role="incomehint"]');
+    if((m.incomes||[]).length===0){
+      hintEl.textContent = tf.total>0
+        ? `Currently just your \u20b9${fmt(tf.total)} transfer in \u2014 add a source below for anything extra.`
+        : 'No income logged yet \u2014 add a source below.';
+    } else { hintEl.textContent=''; }
     (m.incomes||[]).forEach(inc=>{
-      const r=document.createElement('div'); r.style.cssText='display:flex;align-items:center;gap:8px;';
-      r.innerHTML=`<input type="text" value="${inc.name}" data-role="incname" style="flex:1;text-align:left;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 10px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark-ink);">
-        <input type="number" inputmode="decimal" value="${inc.amount||''}" data-role="incamt" style="width:100px;text-align:right;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 10px;font-size:15px;font-variant-numeric:tabular-nums;font-family:inherit;background:#fff;color:var(--dark-ink);">
-        <button data-role="incremove" style="width:32px;height:32px;flex-shrink:0;border-radius:8px;border:none;background:var(--debit-soft);color:var(--debit);font-weight:700;font-family:inherit;">\u00d7</button>`;
+      const r=document.createElement('div'); r.style.cssText='display:flex;align-items:center;gap:6px;min-width:0;';
+      r.innerHTML=`<input type="text" value="${inc.name}" data-role="incname" style="flex:1;min-width:0;text-align:left;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 10px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark-ink);">
+        <input type="number" inputmode="decimal" value="${inc.amount||''}" data-role="incamt" style="width:88px;flex-shrink:0;text-align:right;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 8px;font-size:15px;font-variant-numeric:tabular-nums;font-family:inherit;background:#fff;color:var(--dark-ink);">
+        <button data-role="incremove" style="width:30px;height:30px;flex-shrink:0;border-radius:8px;border:none;background:var(--debit-soft);color:var(--debit);font-weight:700;font-family:inherit;">\u00d7</button>`;
       r.querySelector('[data-role="incname"]').addEventListener('input', e=>{ inc.name=e.target.value; saveStateDebounced(); });
       r.querySelector('[data-role="incamt"]').addEventListener('input', e=>{
         inc.amount=parseFloat(e.target.value)||0;
@@ -665,7 +686,6 @@ function buildMonthCard(month){
       });
       r.querySelector('[data-role="incremove"]').addEventListener('click', e=>{
         e.stopPropagation(); haptic();
-        if(m.incomes.length<=1) return;
         m.incomes = m.incomes.filter(x=>x.id!==inc.id);
         renderIncomeRows(); updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
       });
@@ -723,7 +743,12 @@ function renderMonthList(){
   const allMonths = MONTHS.filter(mm=>y.months[mm]);
   const currentM = allMonths.find(mm=>isRealCurrent(currentYear,mm));
   const previousM = allMonths.find(mm=>isRealPrevious(currentYear,mm));
-  const olderMonths = allMonths.filter(mm=>mm!==currentM && mm!==previousM).sort((a,b)=>MONTHS.indexOf(b)-MONTHS.indexOf(a));
+  const currentIdx = currentM ? MONTHS.indexOf(currentM) : null;
+  const olderMonths = allMonths.filter(mm=>{
+    if(mm===currentM || mm===previousM) return false;
+    if(currentIdx!==null && MONTHS.indexOf(mm) > currentIdx) return false;
+    return true;
+  }).sort((a,b)=>MONTHS.indexOf(b)-MONTHS.indexOf(a));
 
   if(!currentM && !previousM && !olderMonths.length){
     list.innerHTML=`<div class="empty">No months for ${currentYear} yet.</div>`;
@@ -805,11 +830,11 @@ function renderStructural(){
 }
 
 /* ---------- modals: year ---------- */
-document.getElementById('closeAddYear').onclick=()=>document.getElementById('addYearModal').classList.remove('show');
+document.getElementById('closeAddYear').onclick=()=>closeModal('addYearModal');
 document.getElementById('saveAddYear').onclick=()=>{
   const val=document.getElementById('newYearInput').value.trim(); if(!val) return;
   if(!account().years[val]) account().years[val]={months:{}, visible:[]};
-  currentYear=val; saveStateNow(); document.getElementById('addYearModal').classList.remove('show'); renderStructural();
+  currentYear=val; saveStateNow(); closeModal('addYearModal'); renderStructural();
 };
 
 /* ---------- modals: add account ---------- */
@@ -829,15 +854,15 @@ document.getElementById('addAccountBtn').onclick=()=>{
   document.getElementById('newAccountInput').value='';
   pendingNewTheme = THEMES[Object.keys(state.accounts).length % THEMES.length].key;
   renderThemeGrid(document.getElementById('newAccountThemeGrid'), pendingNewTheme, (k)=>pendingNewTheme=k);
-  document.getElementById('addAccountModal').classList.add('show');
+  openModal('addAccountModal');
 };
-document.getElementById('closeAddAccount').onclick=()=>document.getElementById('addAccountModal').classList.remove('show');
+document.getElementById('closeAddAccount').onclick=()=>closeModal('addAccountModal');
 document.getElementById('saveAddAccount').onclick=()=>{
   const name=document.getElementById('newAccountInput').value.trim(); if(!name) return;
   const id=uid(); const y=new Date().getFullYear();
   state.accounts[id]={ name, theme:pendingNewTheme, years:{[y]:{months:{}, visible:[]}}, categories: freshCategories() };
   currentAccountId=id; currentYear=String(y);
-  saveStateNow(); document.getElementById('addAccountModal').classList.remove('show'); renderStructural();
+  saveStateNow(); closeModal('addAccountModal'); renderStructural();
 };
 
 /* ---------- modals: edit account ---------- */
@@ -846,26 +871,27 @@ document.getElementById('editAccountBtn').onclick=()=>{
   document.getElementById('editAccountInput').value = account().name;
   pendingEditTheme = account().theme;
   renderThemeGrid(document.getElementById('editAccountThemeGrid'), pendingEditTheme, (k)=>pendingEditTheme=k);
-  document.getElementById('editAccountModal').classList.add('show');
+  openModal('editAccountModal');
 };
-document.getElementById('closeEditAccount').onclick=()=>document.getElementById('editAccountModal').classList.remove('show');
+document.getElementById('closeEditAccount').onclick=()=>closeModal('editAccountModal');
 document.getElementById('saveEditAccount').onclick=()=>{
   const name=document.getElementById('editAccountInput').value.trim();
   if(name) account().name=name;
   account().theme = pendingEditTheme;
-  saveStateNow(); document.getElementById('editAccountModal').classList.remove('show'); renderStructural();
+  saveStateNow(); closeModal('editAccountModal'); renderStructural();
 };
 document.getElementById('deleteAccountBtn').onclick=()=>{
   if(Object.keys(state.accounts).length<=1){ alert('You need at least one account \u2014 create another before deleting this one.'); return; }
   if(!confirm(`Delete "${account().name}" and all of its data? This can\u2019t be undone.`)) return;
   haptic(true);
+  snapshotForUndo(`Deleted "${account().name}"`);
   const deletedId = currentAccountId;
   Object.values(state.accounts).forEach(a=> a.categories.forEach(c=>{ if(c.linkTo===deletedId) c.linkTo=null; }));
   delete state.accounts[deletedId];
   currentAccountId = Object.keys(state.accounts)[0];
   currentYear = Object.keys(account().years).sort().pop();
   saveStateNow();
-  document.getElementById('editAccountModal').classList.remove('show');
+  closeModal('editAccountModal');
   renderStructural();
 };
 
@@ -894,32 +920,54 @@ function renderCategoryFields(){
 }
 function makeRowDraggable(row, container){
   const handle = row.querySelector('[data-role="drag"]');
-  let dragging=false;
-  handle.addEventListener('pointerdown', e=>{
-    dragging=true; haptic(true);
-    handle.setPointerCapture(e.pointerId);
+  let dragging=false, startY=0, rafPending=false, lastY=0;
+
+  function onDown(e){
+    e.preventDefault();
+    dragging=true; haptic(true); startY=e.clientY;
     row.classList.add('dragging');
-  });
-  handle.addEventListener('pointermove', e=>{
+    row.style.transition='none';
+    row.style.position='relative'; row.style.zIndex='10';
+    document.body.style.userSelect='none'; document.body.style.webkitUserSelect='none';
+    document.addEventListener('pointermove', onMove, {passive:false});
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+  }
+  function onMove(e){
     if(!dragging) return;
-    const y=e.clientY;
-    [...container.children].forEach(sib=>{
-      if(sib===row) return;
+    e.preventDefault();
+    lastY = e.clientY;
+    if(rafPending) return;
+    rafPending=true;
+    requestAnimationFrame(applyMove);
+  }
+  function applyMove(){
+    rafPending=false;
+    const y=lastY;
+    row.style.transform=`translateY(${y-startY}px)`;
+    for(const sib of [...container.children]){
+      if(sib===row) continue;
       const rect=sib.getBoundingClientRect();
       const mid=rect.top+rect.height/2;
       if(y>=rect.top && y<=rect.bottom){
-        if(y<mid) container.insertBefore(row, sib);
-        else container.insertBefore(row, sib.nextElementSibling);
+        if(y<mid) container.insertBefore(row, sib); else container.insertBefore(row, sib.nextElementSibling);
+        startY=y; row.style.transform='translateY(0px)';
+        break;
       }
-    });
-  });
-  function endDrag(){
+    }
+  }
+  function onUp(){
     if(!dragging) return;
     dragging=false; haptic();
     row.classList.remove('dragging');
+    row.style.transform=''; row.style.position=''; row.style.zIndex='';
+    row.style.transition='';
+    document.body.style.userSelect=''; document.body.style.webkitUserSelect='';
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
   }
-  handle.addEventListener('pointerup', endDrag);
-  handle.addEventListener('pointercancel', endDrag);
+  handle.addEventListener('pointerdown', onDown);
 }
 document.getElementById('totExpenseRow').onclick=()=>{
   const el=document.getElementById('totCatLines');
@@ -928,8 +976,8 @@ document.getElementById('totExpenseRow').onclick=()=>{
   el.style.display = open? 'none':'block';
   chevron.style.transform = open? '' : 'rotate(180deg)';
 };
-document.getElementById('settingsBtn').onclick=()=>{ renderCategoryFields(); document.getElementById('settingsModal').classList.add('show'); };
-document.getElementById('closeSettings').onclick=()=>document.getElementById('settingsModal').classList.remove('show');
+document.getElementById('settingsBtn').onclick=()=>{ renderCategoryFields(); openModal('settingsModal'); };
+document.getElementById('closeSettings').onclick=()=>closeModal('settingsModal');
 document.getElementById('addCatBtn').onclick=()=>{
   haptic();
   const id=uid();
@@ -946,8 +994,12 @@ document.getElementById('saveSettings').onclick=()=>{
     const existing = account().categories.find(c=>c.id===catId);
     if(existing){ existing.name = nameInp.value.trim() || existing.name; existing.linkTo = linkSel.value || null; kept.push(existing); }
   });
+  if(kept.length < account().categories.length){
+    const removedCount = account().categories.length - kept.length;
+    snapshotForUndo(removedCount===1 ? 'Removed a category' : `Removed ${removedCount} categories`);
+  }
   account().categories = kept;
-  saveStateNow(); document.getElementById('settingsModal').classList.remove('show'); renderStructural();
+  saveStateNow(); closeModal('settingsModal'); renderStructural();
 };
 
 /* ---------- app passcode (privacy screen, not encryption) ---------- */
@@ -961,9 +1013,9 @@ document.getElementById('lockSettingsBtn').onclick=()=>{
     ? `<div class="field"><label>Current passcode</label><input type="password" inputmode="numeric" maxlength="6" id="curPin" style="width:110px;text-align:right;"></div>
        <div class="field" style="margin-top:10px;"><label>New passcode (blank to remove)</label><input type="password" inputmode="numeric" maxlength="6" id="newPin" style="width:110px;text-align:right;"></div>`
     : `<div class="field"><label>New passcode</label><input type="password" inputmode="numeric" maxlength="6" id="newPin" style="width:110px;text-align:right;"></div>`;
-  document.getElementById('lockModal').classList.add('show');
+  openModal('lockModal');
 };
-document.getElementById('closeLockModal').onclick=()=>document.getElementById('lockModal').classList.remove('show');
+document.getElementById('closeLockModal').onclick=()=>closeModal('lockModal');
 document.getElementById('saveLockModal').onclick=()=>{
   const has = !!(state.security && state.security.pinHash);
   if(has){
@@ -974,7 +1026,7 @@ document.getElementById('saveLockModal').onclick=()=>{
   if(!state.security) state.security={pinHash:null};
   state.security.pinHash = next ? simpleHash(next) : null;
   saveStateNow();
-  document.getElementById('lockModal').classList.remove('show');
+  closeModal('lockModal');
 };
 
 function tryUnlock(){
@@ -989,6 +1041,29 @@ function tryUnlock(){
 }
 document.getElementById('pinUnlockBtn').onclick=tryUnlock;
 document.getElementById('pinInput').addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+
+/* ---------- undo ---------- */
+let undoSnapshot=null, undoTimer=null;
+function snapshotForUndo(label){
+  undoSnapshot = JSON.stringify(state);
+  clearTimeout(undoTimer);
+  const toast=document.getElementById('undoToast');
+  document.getElementById('undoToastText').textContent=label;
+  toast.style.display='flex';
+  undoTimer=setTimeout(()=>{ toast.style.display='none'; undoSnapshot=null; }, 6000);
+}
+document.getElementById('undoToastBtn').onclick=()=>{
+  if(!undoSnapshot) return;
+  haptic(true);
+  state = JSON.parse(undoSnapshot);
+  undoSnapshot=null;
+  clearTimeout(undoTimer);
+  document.getElementById('undoToast').style.display='none';
+  if(!state.accounts[currentAccountId]) currentAccountId = state.currentAccountId || Object.keys(state.accounts)[0];
+  if(!account().years[currentYear]) currentYear = Object.keys(account().years).sort().pop();
+  saveStateNow();
+  renderStructural();
+};
 
 /* ---------- init ---------- */
 (function init(){
@@ -1005,32 +1080,70 @@ document.getElementById('pinInput').addEventListener('keydown', e=>{ if(e.key===
   if(state.security.pinHash){ document.getElementById('lockOverlay').style.display='flex'; }
 })();
 
+// iOS Safari suppresses the :active CSS state on tap unless some touch
+// listener exists on the page — this no-op listener is what enables it.
+document.addEventListener('touchstart', function(){}, {passive:true});
+
+let openModalCount=0, savedScrollY=0;
+function openModal(id){
+  const el=document.getElementById(id);
+  if(!el.classList.contains('show')){
+    if(openModalCount===0){
+      savedScrollY=window.scrollY||window.pageYOffset||0;
+      document.body.style.position='fixed';
+      document.body.style.top=(-savedScrollY)+'px';
+      document.body.style.left='0'; document.body.style.right='0';
+    }
+    openModalCount++;
+  }
+  el.classList.add('show');
+}
+function closeModal(id){
+  const el=document.getElementById(id);
+  if(el.classList.contains('show')){
+    openModalCount=Math.max(0,openModalCount-1);
+    el.classList.remove('show');
+    if(openModalCount===0){
+      document.body.style.position='';
+      document.body.style.top='';
+      document.body.style.left=''; document.body.style.right='';
+      window.scrollTo(0, savedScrollY);
+    }
+  }
+}
+
 function enableSwipeToDismiss(backdropId){
   const backdrop=document.getElementById(backdropId);
   if(!backdrop) return;
   const modal=backdrop.querySelector('.modal');
+  const handle=backdrop.querySelector('.modal-handle');
   let dragging=false, startY=0, currentY=0;
-  modal.addEventListener('pointerdown', e=>{
-    const rect=modal.getBoundingClientRect();
-    if(e.clientY - rect.top > 44) return;
+
+  function onDown(e){
+    e.preventDefault();
     dragging=true; startY=e.clientY; currentY=0;
-    modal.setPointerCapture(e.pointerId);
     modal.style.transition='none';
-  });
-  modal.addEventListener('pointermove', e=>{
+    document.addEventListener('pointermove', onMove, {passive:false});
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
+  }
+  function onMove(e){
     if(!dragging) return;
+    e.preventDefault();
     currentY = Math.max(0, e.clientY - startY);
     modal.style.transform=`translateY(${currentY}px)`;
-  });
-  function endDrag(){
+  }
+  function onUp(){
     if(!dragging) return;
     dragging=false;
     modal.style.transition='';
     modal.style.transform='';
-    if(currentY>80){ haptic(); backdrop.classList.remove('show'); }
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
+    if(currentY>80){ haptic(); closeModal(backdropId); }
   }
-  modal.addEventListener('pointerup', endDrag);
-  modal.addEventListener('pointercancel', endDrag);
+  handle.addEventListener('pointerdown', onDown);
 }
 ['lockModal','settingsModal','addYearModal','addAccountModal','editAccountModal'].forEach(enableSwipeToDismiss);
 
