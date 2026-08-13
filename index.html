@@ -95,12 +95,13 @@
   .chip.bump{transform:scale(1.12);}
   .chevron{width:9px;height:9px;border-right:2px solid var(--ink-soft);border-bottom:2px solid var(--ink-soft);
     transform:rotate(-45deg);transition:transform .3s var(--spring);}
-  .month-card.open .chevron{transform:rotate(45deg);}
+  .month-card.open > .month-row .chevron{transform:rotate(45deg);}
 
   .month-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .38s var(--spring);border-top:0px solid var(--rule);}
-  .month-card.open .month-body{grid-template-rows:1fr;border-top:1px solid var(--rule);}
+  .month-card.open > .month-body{grid-template-rows:1fr;border-top:1px solid var(--rule);}
   .month-body-inner{overflow:hidden;min-height:0;}
   .field-grid{padding:14px 16px 18px;display:flex;flex-direction:column;gap:12px;}
+  .archive-card .month-card{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,.09);}
 
   .highlights{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px 0;}
   .hl-tag{font-size:11.5px;padding:5px 9px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--ink-soft);border:1px solid var(--glass-border);}
@@ -136,9 +137,10 @@
     opacity:0;pointer-events:none;transition:opacity .25s var(--spring);}
   .modal-backdrop.show{opacity:1;pointer-events:auto;}
   .modal{background:rgba(255,255,255,.96);backdrop-filter:blur(24px);width:100%;max-width:430px;margin:0 auto;border-radius:20px 20px 0 0;
-    color:var(--dark-ink);
-    padding:20px 20px calc(env(safe-area-inset-bottom,0px) + 20px);max-height:82vh;overflow-y:auto;
+    color:var(--dark-ink);position:relative;
+    padding:32px 20px calc(env(safe-area-inset-bottom,0px) + 20px);max-height:82vh;overflow-y:auto;
     transform:translateY(30px);transition:transform .3s var(--spring);}
+  .modal::before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:36px;height:4px;border-radius:2px;background:rgba(0,0,0,.18);}
   .modal-backdrop.show .modal{transform:translateY(0);}
   .modal h2{font-size:17px;margin:0 0 14px;color:var(--dark-ink);}
   .modal .field label{color:var(--dark-soft);}
@@ -153,8 +155,12 @@
   .cat-row-top{display:flex;align-items:center;gap:8px;}
   .cat-row-top input[type=text]{flex:1;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:7px 9px;font-size:14px;font-family:inherit;color:var(--dark-ink);}
   .cat-remove{width:28px;height:28px;border-radius:8px;border:none;background:var(--debit-soft);color:#B23A32;font-weight:700;font-family:inherit;}
+  .cat-drag{width:30px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;letter-spacing:-2px;
+    color:var(--dark-soft);cursor:grab;touch-action:none;flex-shrink:0;user-select:none;}
+  .cat-row.dragging{opacity:.6;box-shadow:0 6px 16px rgba(0,0,0,.25);position:relative;z-index:5;}
   .cat-row select{width:100%;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit;color:var(--dark-soft);background:#fff;}
   .add-cat-btn{padding:10px;border-radius:10px;border:1.5px dashed rgba(0,0,0,.18);background:transparent;color:var(--dark-soft);font-size:13px;font-family:inherit;}
+  .add-income-btn{padding:10px;border-radius:10px;border:1.5px dashed var(--accent);background:rgba(255,255,255,.08);color:var(--accent);font-size:13px;font-weight:600;font-family:inherit;}
 
   .theme-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
   .theme-swatch{width:56px;height:56px;border-radius:14px;border:2px solid transparent;position:relative;overflow:hidden;transition:transform .15s var(--spring);}
@@ -232,13 +238,15 @@
   </button>
 
   <div class="month-list" id="monthList"></div>
-  <button class="add-month-btn" id="addMonthBtn" style="display:none;">+ Add a month</button>
 
   <div class="totals-card" id="totalsCard" style="display:none;">
     <p class="totals-title">Year total — <span id="totalsYear"></span></p>
     <div class="totals-line"><span>Income</span><b id="totIncome">0</b></div>
     <div class="totals-line" id="totTransferLine" style="display:none;"><span>Transfers in</span><b id="totTransfer">0</b></div>
-    <div id="totCatLines"></div>
+    <div class="totals-line" id="totExpenseRow" style="cursor:pointer;">
+      <span>Expenses <span id="expChevron" style="display:inline-block;transition:transform .2s;font-size:10px;">▾</span></span><b id="totExpense">0</b>
+    </div>
+    <div id="totCatLines" style="display:none;padding-left:14px;"></div>
     <div class="totals-line final"><span>Net balance</span><b id="totBalance">0</b></div>
   </div>
 
@@ -268,13 +276,6 @@
   <div class="modal-actions"><button class="btn-cancel" id="closeAddYear">Cancel</button><button class="btn-save" id="saveAddYear">Add</button></div>
 </div></div>
 
-<div class="modal-backdrop" id="addMonthModal"><div class="modal">
-  <h2 class="serif">Add a month</h2>
-  <p style="font-size:12.5px;color:var(--dark-soft);margin:-6px 0 14px;line-height:1.5;">Current and previous month always show at the top. Anything else lands in "Older months" below \u2014 useful for backfilling a past month or getting a head start on next month.</p>
-  <div class="field"><label>Month</label><select id="addMonthSelect" style="flex:1;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:8px;font-size:14px;font-family:inherit;color:var(--dark-ink);"></select></div>
-  <div class="modal-actions"><button class="btn-cancel" id="closeAddMonth">Cancel</button><button class="btn-save" id="saveAddMonth">Add</button></div>
-</div></div>
-
 <div class="modal-backdrop" id="addAccountModal"><div class="modal">
   <h2 class="serif">Add an account</h2>
   <div class="field"><label>Name</label><input type="text" id="newAccountInput" placeholder="e.g. Travel Fund" style="width:160px;text-align:left;"></div>
@@ -289,7 +290,7 @@
   <p style="font-size:12px;color:var(--ink-soft);margin:14px 0 6px;">Theme</p>
   <div class="theme-grid" id="editAccountThemeGrid"></div>
   <div class="modal-actions"><button class="btn-cancel" id="closeEditAccount">Cancel</button><button class="btn-save" id="saveEditAccount">Save</button></div>
-  <button id="deleteAccountBtn" style="width:100%;margin-top:10px;padding:11px;border-radius:12px;border:none;background:var(--debit-soft);color:var(--debit);font-size:13.5px;font-weight:600;font-family:inherit;">Delete this account</button>
+  <button id="deleteAccountBtn" style="width:100%;margin-top:10px;padding:11px;border-radius:12px;border:none;background:#FBE4E1;color:#B3261E;font-size:13.5px;font-weight:700;font-family:inherit;">Delete this account</button>
 </div></div>
 
 <script>
@@ -578,13 +579,19 @@ function realNow(){
 function isRealCurrent(year, month){ const r=realNow(); return year===r.year && month===r.month; }
 function isRealPrevious(year, month){ const r=realNow(); return year===r.prevYear && month===r.prevMonth; }
 
-function ensureCurrentPrevious(){
+function ensureCalendarMonths(){
   const r = realNow();
+  const curIdx = MONTHS.indexOf(r.month);
   Object.values(state.accounts).forEach(acc=>{
-    [[r.year,r.month],[r.prevYear,r.prevMonth]].forEach(([yr,mo])=>{
-      const y = acc.years[yr] || (acc.years[yr]={months:{}});
+    const y = acc.years[r.year] || (acc.years[r.year]={months:{}});
+    for(let i=0;i<=curIdx;i++){
+      const mo = MONTHS[i];
       if(!y.months[mo]) y.months[mo]=freshMonth();
-    });
+    }
+    if(r.prevYear!==r.year){
+      const py = acc.years[r.prevYear] || (acc.years[r.prevYear]={months:{}});
+      if(!py.months[r.prevMonth]) py.months[r.prevMonth]=freshMonth();
+    }
   });
 }
 
@@ -611,7 +618,7 @@ function buildMonthCard(month){
   const incomeRowsEl=document.createElement('div'); incomeRowsEl.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:6px;';
   incomeWrap.appendChild(incomeRowsEl);
   const addIncomeBtn=document.createElement('button');
-  addIncomeBtn.className='add-cat-btn'; addIncomeBtn.style.marginTop='8px'; addIncomeBtn.style.width='100%';
+  addIncomeBtn.className='add-income-btn'; addIncomeBtn.style.marginTop='8px'; addIncomeBtn.style.width='100%';
   addIncomeBtn.textContent='+ Add income source';
   incomeWrap.appendChild(addIncomeBtn);
   fg.appendChild(incomeWrap);
@@ -637,19 +644,6 @@ function buildMonthCard(month){
   const resultDiv=document.createElement('div'); resultDiv.className='result-row';
   resultDiv.innerHTML=`<span class="label">Remaining balance</span><span class="val" data-role="result">${fmt(bal)}</span>`;
   fg.appendChild(resultDiv);
-
-  const deleteBtn=document.createElement('button');
-  deleteBtn.textContent='Delete this month';
-  deleteBtn.style.cssText='width:100%;margin-top:14px;padding:10px;border-radius:10px;border:none;background:var(--debit-soft);color:var(--debit);font-size:13px;font-weight:600;font-family:inherit;';
-  deleteBtn.onclick=(e)=>{
-    e.stopPropagation();
-    if(!confirm(`Delete ${month}'s data? This can\u2019t be undone.`)) return;
-    haptic(true);
-    const y=account().years[currentYear];
-    delete y.months[month];
-    saveStateNow(); renderMonthList(); renderHero(); renderTotals();
-  };
-  fg.appendChild(deleteBtn);
 
   inner.appendChild(hlDiv); inner.appendChild(fg);
   body.appendChild(inner);
@@ -732,22 +726,11 @@ function renderMonthList(){
   const olderMonths = allMonths.filter(mm=>mm!==currentM && mm!==previousM).sort((a,b)=>MONTHS.indexOf(b)-MONTHS.indexOf(a));
 
   if(!currentM && !previousM && !olderMonths.length){
-    list.innerHTML=`<div class="empty">No months added yet for ${currentYear}.<br>Tap "Add a month" to start.</div>`;
+    list.innerHTML=`<div class="empty">No months for ${currentYear} yet.</div>`;
   }
   if(currentM){ const {card,refs}=buildMonthCard(currentM); monthCardRefs[currentM]=refs; list.appendChild(card); }
   if(previousM){ const {card,refs}=buildMonthCard(previousM); monthCardRefs[previousM]=refs; list.appendChild(card); }
   if(olderMonths.length){ list.appendChild(buildOlderMonthsArchive(olderMonths)); }
-
-  const existing = new Set(allMonths);
-  document.getElementById('addMonthBtn').style.display = existing.size<12 ? 'block' : 'none';
-  document.getElementById('addMonthBtn').onclick=()=>{
-    const sel=document.getElementById('addMonthSelect'); sel.innerHTML='';
-    MONTHS.filter(mm=>!existing.has(mm)).forEach(mm=>{
-      const opt=document.createElement('option'); opt.value=mm; opt.textContent=mm;
-      sel.appendChild(opt);
-    });
-    document.getElementById('addMonthModal').classList.add('show');
-  };
 }
 
 /* ---------- live updates ---------- */
@@ -806,8 +789,9 @@ function renderTotals(){
   const tline=document.getElementById('totTransferLine');
   if(transfers>0){ tline.style.display='flex'; document.getElementById('totTransfer').textContent=fmt(transfers); } else tline.style.display='none';
   const catLinesEl=document.getElementById('totCatLines');
-  catLinesEl.innerHTML = acc.categories.map(c=>`<div class="totals-line"><span>${c.name}</span><b>${fmt(catTotals[c.id])}</b></div>`).join('');
   let deduct=0; acc.categories.forEach(c=> deduct+=catTotals[c.id]);
+  document.getElementById('totExpense').textContent=fmt(deduct);
+  catLinesEl.innerHTML = acc.categories.map(c=>`<div class="totals-line" style="font-size:13px;"><span>${c.name}</span><b>${fmt(catTotals[c.id])}</b></div>`).join('');
   document.getElementById('totBalance').textContent=fmt(income+transfers-deduct);
 }
 
@@ -826,16 +810,6 @@ document.getElementById('saveAddYear').onclick=()=>{
   const val=document.getElementById('newYearInput').value.trim(); if(!val) return;
   if(!account().years[val]) account().years[val]={months:{}, visible:[]};
   currentYear=val; saveStateNow(); document.getElementById('addYearModal').classList.remove('show'); renderStructural();
-};
-
-document.getElementById('closeAddMonth').onclick=()=>document.getElementById('addMonthModal').classList.remove('show');
-document.getElementById('saveAddMonth').onclick=()=>{
-  const mo=document.getElementById('addMonthSelect').value; if(!mo) return;
-  haptic(true);
-  monthData(currentAccountId,currentYear,mo);
-  saveStateNow();
-  document.getElementById('addMonthModal').classList.remove('show');
-  renderMonthList(); renderHero(); renderTotals();
 };
 
 /* ---------- modals: add account ---------- */
@@ -898,11 +872,13 @@ document.getElementById('deleteAccountBtn').onclick=()=>{
 /* ---------- modals: recurring categories ---------- */
 function renderCategoryFields(){
   const el=document.getElementById('recurringFields'); el.innerHTML='';
-  account().categories.forEach(c=>{
+  const cats=account().categories;
+  cats.forEach((c)=>{
     const row=document.createElement('div'); row.className='cat-row';
     const otherAccounts = Object.entries(state.accounts).filter(([id])=>id!==currentAccountId);
     row.innerHTML=`
       <div class="cat-row-top">
+        <div class="cat-drag" data-role="drag">\u22ee\u22ee</div>
         <input type="text" value="${c.name}" data-role="name">
         <button class="cat-remove" data-role="remove">\u00d7</button>
       </div>
@@ -913,8 +889,45 @@ function renderCategoryFields(){
     row.querySelector('[data-role="remove"]').onclick=()=>{ haptic(); row.remove(); row.dataset.removed='1'; };
     row.dataset.catId=c.id;
     el.appendChild(row);
+    makeRowDraggable(row, el);
   });
 }
+function makeRowDraggable(row, container){
+  const handle = row.querySelector('[data-role="drag"]');
+  let dragging=false;
+  handle.addEventListener('pointerdown', e=>{
+    dragging=true; haptic(true);
+    handle.setPointerCapture(e.pointerId);
+    row.classList.add('dragging');
+  });
+  handle.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const y=e.clientY;
+    [...container.children].forEach(sib=>{
+      if(sib===row) return;
+      const rect=sib.getBoundingClientRect();
+      const mid=rect.top+rect.height/2;
+      if(y>=rect.top && y<=rect.bottom){
+        if(y<mid) container.insertBefore(row, sib);
+        else container.insertBefore(row, sib.nextElementSibling);
+      }
+    });
+  });
+  function endDrag(){
+    if(!dragging) return;
+    dragging=false; haptic();
+    row.classList.remove('dragging');
+  }
+  handle.addEventListener('pointerup', endDrag);
+  handle.addEventListener('pointercancel', endDrag);
+}
+document.getElementById('totExpenseRow').onclick=()=>{
+  const el=document.getElementById('totCatLines');
+  const chevron=document.getElementById('expChevron');
+  const open = el.style.display!=='none';
+  el.style.display = open? 'none':'block';
+  chevron.style.transform = open? '' : 'rotate(180deg)';
+};
 document.getElementById('settingsBtn').onclick=()=>{ renderCategoryFields(); document.getElementById('settingsModal').classList.add('show'); };
 document.getElementById('closeSettings').onclick=()=>document.getElementById('settingsModal').classList.remove('show');
 document.getElementById('addCatBtn').onclick=()=>{
@@ -984,13 +997,42 @@ document.getElementById('pinInput').addEventListener('keydown', e=>{ if(e.key===
   Object.values(state.accounts).forEach((a,i)=>{
     if(!THEME_BY_KEY[a.theme]) a.theme = OLD_THEME_MAP[a.theme] || THEMES[i%THEMES.length].key;
   });
-  ensureCurrentPrevious();
+  ensureCalendarMonths();
   saveStateNow();
   currentAccountId = state.currentAccountId || Object.keys(state.accounts)[0];
   currentYear = realNow().year;
   renderStructural();
   if(state.security.pinHash){ document.getElementById('lockOverlay').style.display='flex'; }
 })();
+
+function enableSwipeToDismiss(backdropId){
+  const backdrop=document.getElementById(backdropId);
+  if(!backdrop) return;
+  const modal=backdrop.querySelector('.modal');
+  let dragging=false, startY=0, currentY=0;
+  modal.addEventListener('pointerdown', e=>{
+    const rect=modal.getBoundingClientRect();
+    if(e.clientY - rect.top > 44) return;
+    dragging=true; startY=e.clientY; currentY=0;
+    modal.setPointerCapture(e.pointerId);
+    modal.style.transition='none';
+  });
+  modal.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    currentY = Math.max(0, e.clientY - startY);
+    modal.style.transform=`translateY(${currentY}px)`;
+  });
+  function endDrag(){
+    if(!dragging) return;
+    dragging=false;
+    modal.style.transition='';
+    modal.style.transform='';
+    if(currentY>80){ haptic(); backdrop.classList.remove('show'); }
+  }
+  modal.addEventListener('pointerup', endDrag);
+  modal.addEventListener('pointercancel', endDrag);
+}
+['lockModal','settingsModal','addYearModal','addAccountModal','editAccountModal'].forEach(enableSwipeToDismiss);
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
