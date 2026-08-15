@@ -116,6 +116,20 @@
     padding:8px 10px;font-size:15px;font-variant-numeric:tabular-nums;font-family:inherit;background:#fff;color:var(--dark-ink);transition:border-color .2s;}
   .field input:focus{outline:none;border-color:#8A98A6;box-shadow:0 0 0 3px rgba(255,255,255,.15);}
   .field.readonly{opacity:.85;}
+  .cat-field-row{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:6px;}
+  .cat-field-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .cat-name-col{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .cat-name-col label{font-size:14px;color:var(--ink);font-weight:500;}
+  .cat-total-caption{font-size:11px;color:var(--ink-soft);}
+  .cat-total-val{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);flex-shrink:0;}
+  .cat-edit-link{background:none;border:none;color:var(--accent);text-decoration:underline;font-weight:600;font-size:11px;font-family:inherit;padding:0;}
+  .cat-field-bottom{display:flex;gap:6px;align-items:center;}
+  .cat-field-bottom input{flex:1;min-width:0;text-align:left;border:1px solid rgba(0,0,0,.08);border-radius:9px;
+    padding:7px 10px;font-size:13.5px;font-variant-numeric:tabular-nums;font-family:inherit;background:#fff;color:var(--dark-ink);}
+  .cat-add-btn{flex-shrink:0;padding:7px 14px;border-radius:9px;border:none;background:var(--credit-soft);color:var(--credit);
+    font-weight:700;font-size:13px;font-family:inherit;}
+  .cat-edit-btn{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.08);color:var(--ink-soft);font-size:14px;font-family:inherit;}
   .field .readonly-val{font-size:15px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--credit);}
   .divider{height:1px;background:var(--rule);margin:2px 0;}
   .result-row{display:flex;justify-content:space-between;align-items:center;padding-top:2px;}
@@ -628,7 +642,12 @@ function buildMonthCard(month){
 
   const fg=document.createElement('div'); fg.className='field-grid';
   const incomeWrap=document.createElement('div');
-  incomeWrap.innerHTML = `<div class="field" style="margin-bottom:0;"><label style="font-weight:600;color:var(--ink);">Income</label></div>
+  incomeWrap.innerHTML = `<div class="field" style="margin-bottom:0;">
+      <label style="font-weight:600;color:var(--ink);">Income</label>
+      <button type="button" data-role="incomeEditToggle" class="icon-btn" title="Edit saved amounts">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13.5 3.5 16.5 6.5 6.5 16.5 3 17l.5-3.5Z"/></svg>
+      </button>
+    </div>
     <p data-role="incomehint" style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;"></p>`;
   const incomeRowsEl=document.createElement('div'); incomeRowsEl.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:6px;';
   incomeWrap.appendChild(incomeRowsEl);
@@ -652,8 +671,66 @@ function buildMonthCard(month){
   if(acc.categories.length){ const d2=document.createElement('div'); d2.className='divider'; fg.appendChild(d2); }
   acc.categories.forEach(c=>{
     const linkLabel = c.linkTo && state.accounts[c.linkTo] ? ` \u2192 ${state.accounts[c.linkTo].name}` : '';
-    const catDiv=document.createElement('div'); catDiv.className='field';
-    catDiv.innerHTML=`<label>${c.name}${linkLabel}</label><input type="number" inputmode="decimal" value="${catAmount(m,c.id)||''}" data-k="cat" data-cat="${c.id}">`;
+    const catDiv=document.createElement('div'); catDiv.className='field cat-field-row';
+    catDiv.innerHTML=`
+      <div class="cat-field-top">
+        <div class="cat-name-col">
+          <label>${c.name}${linkLabel}</label>
+          <span class="cat-total-caption">Monthly total \u00b7 <button type="button" data-role="catedit" class="cat-edit-link">Edit</button></span>
+        </div>
+        <span class="cat-total-val" data-role="cattotal">\u20b9${fmt(catAmount(m,c.id))}</span>
+      </div>
+      <div class="cat-field-bottom">
+        <input type="number" inputmode="decimal" data-role="catinput" data-mode="add" placeholder="Enter new expense">
+        <button type="button" data-role="catsub" class="cat-sub-btn" title="Subtract from total">\u2212</button>
+        <button type="button" data-role="catadd" class="cat-add-btn">Add</button>
+      </div>`;
+    const catInput = catDiv.querySelector('[data-role="catinput"]');
+    const catTotalEl = catDiv.querySelector('[data-role="cattotal"]');
+    const catEditBtn = catDiv.querySelector('[data-role="catedit"]');
+    const catAddBtn = catDiv.querySelector('[data-role="catadd"]');
+    const catSubBtn = catDiv.querySelector('[data-role="catsub"]');
+
+    function commitCat(sign){
+      const val = catInput.value.trim();
+      const isEditMode = catInput.dataset.mode==='edit';
+      if(val===''){
+        if(!isEditMode) return;
+      }
+      const num = val==='' ? 0 : parseFloat(val);
+      if(isNaN(num)){ catInput.value=''; return; }
+      if(!m.cats) m.cats={};
+      if(isEditMode){
+        m.cats[c.id]=num;
+        catInput.dataset.mode='add';
+        catInput.placeholder='Enter new expense';
+        catAddBtn.textContent='Add';
+        catSubBtn.style.display='';
+      } else {
+        m.cats[c.id]=Math.max(0, (m.cats[c.id]||0)+sign*num);
+      }
+      catInput.value='';
+      catTotalEl.textContent='\u20b9'+fmt(m.cats[c.id]);
+      updateMonthCardLive(month, refs, m);
+      renderHero(); renderTotals();
+      saveStateDebounced();
+    }
+    catInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); commitCat(1); catInput.blur(); } });
+    [catAddBtn, catSubBtn].forEach(btn=>{
+      btn.addEventListener('pointerdown', e=>{ e.preventDefault(); });
+    });
+    catAddBtn.addEventListener('click', e=>{ e.stopPropagation(); haptic(); commitCat(1); });
+    catSubBtn.addEventListener('click', e=>{ e.stopPropagation(); haptic(); commitCat(-1); });
+    catEditBtn.addEventListener('click', e=>{
+      e.stopPropagation(); haptic();
+      catInput.dataset.mode='edit';
+      catInput.value = catAmount(m,c.id) || 0;
+      catInput.placeholder='Set exact total';
+      catAddBtn.textContent='Save';
+      catSubBtn.style.display='none';
+      catInput.focus(); if(catInput.select) catInput.select();
+    });
+
     fg.appendChild(catDiv);
   });
   const resultDiv=document.createElement('div'); resultDiv.className='result-row';
@@ -666,6 +743,7 @@ function buildMonthCard(month){
   const refs={ chipEl:row.querySelector('[data-role="chip"]'), metaEl:row.querySelector('[data-role="meta"]'),
     resultEl:fg.querySelector('[data-role="result"]'), highlightsEl:hlDiv, spentEl:fg.querySelector('[data-role="spentval"]') };
 
+  let incomeEditMode = false;
   function renderIncomeRows(){
     incomeRowsEl.innerHTML='';
     const hintEl = incomeWrap.querySelector('[data-role="incomehint"]');
@@ -674,12 +752,31 @@ function buildMonthCard(month){
         ? `Currently just your \u20b9${fmt(tf.total)} transfer in \u2014 add a source below for anything extra.`
         : 'No income logged yet \u2014 add a source below.';
     } else { hintEl.textContent=''; }
+
+    if(!incomeEditMode){
+      (m.incomes||[]).forEach(inc=>{
+        const r=document.createElement('div');
+        r.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:6px 2px;';
+        r.innerHTML=`<span style="font-size:16px;font-weight:600;color:var(--ink);">${inc.name}</span>
+          <span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);">\u20b9${fmt(inc.amount)}</span>`;
+        incomeRowsEl.appendChild(r);
+      });
+      return;
+    }
+
     (m.incomes||[]).forEach(inc=>{
-      const r=document.createElement('div'); r.style.cssText='display:flex;align-items:center;gap:6px;min-width:0;';
-      r.innerHTML=`<input type="text" value="${inc.name}" data-role="incname" style="flex:1;min-width:0;text-align:left;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 10px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark-ink);">
-        <input type="number" inputmode="decimal" value="${inc.amount||''}" data-role="incamt" style="width:88px;flex-shrink:0;text-align:right;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 8px;font-size:15px;font-variant-numeric:tabular-nums;font-family:inherit;background:#fff;color:var(--dark-ink);">
+      const r=document.createElement('div'); r.style.cssText='display:flex;align-items:center;gap:6px;';
+      r.innerHTML=`
+        <input type="text" value="${inc.name}" data-role="incname" style="flex:1;min-width:0;text-align:left;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 10px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark-ink);">
+        <input type="number" inputmode="decimal" value="${inc.amount||''}" data-role="incamt" style="width:96px;flex-shrink:0;text-align:right;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 8px;font-size:15px;font-variant-numeric:tabular-nums;font-family:inherit;background:#fff;color:var(--dark-ink);">
         <button data-role="incremove" style="width:30px;height:30px;flex-shrink:0;border-radius:8px;border:none;background:var(--debit-soft);color:var(--debit);font-weight:700;font-family:inherit;">\u00d7</button>`;
-      r.querySelector('[data-role="incname"]').addEventListener('input', e=>{ inc.name=e.target.value; saveStateDebounced(); });
+      r.querySelector('[data-role="incname"]').addEventListener('input', e=>{
+        inc.name=e.target.value; saveStateDebounced();
+      });
+      r.querySelector('[data-role="incname"]').addEventListener('blur', ()=>{
+        if(!inc.name.trim()) inc.name='Income source';
+        updateHighlights(month, refs, m);
+      });
       r.querySelector('[data-role="incamt"]').addEventListener('input', e=>{
         inc.amount=parseFloat(e.target.value)||0;
         updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
@@ -687,28 +784,38 @@ function buildMonthCard(month){
       r.querySelector('[data-role="incremove"]').addEventListener('click', e=>{
         e.stopPropagation(); haptic();
         m.incomes = m.incomes.filter(x=>x.id!==inc.id);
+        updateIncomeVisibility();
         renderIncomeRows(); updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
       });
       incomeRowsEl.appendChild(r);
     });
   }
+  const incomeEditToggleBtn = incomeWrap.querySelector('[data-role="incomeEditToggle"]');
+  const editIconSVG = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13.5 3.5 16.5 6.5 6.5 16.5 3 17l.5-3.5Z"/></svg>';
+  function updateIncomeEditToggle(){
+    incomeEditToggleBtn.innerHTML = incomeEditMode ? 'Done' : editIconSVG;
+    incomeEditToggleBtn.style.width = incomeEditMode ? 'auto' : '30px';
+    incomeEditToggleBtn.style.padding = incomeEditMode ? '0 12px' : '0';
+  }
+  function updateIncomeVisibility(){
+    const hasIncomes = (m.incomes||[]).length>0;
+    incomeEditToggleBtn.style.display = hasIncomes ? '' : 'none';
+    addIncomeBtn.style.display = (!hasIncomes || incomeEditMode) ? '' : 'none';
+  }
+  incomeEditToggleBtn.addEventListener('click', e=>{
+    e.stopPropagation(); haptic();
+    incomeEditMode = !incomeEditMode;
+    updateIncomeEditToggle(); updateIncomeVisibility(); renderIncomeRows();
+  });
+  updateIncomeEditToggle(); updateIncomeVisibility();
   renderIncomeRows();
   addIncomeBtn.onclick=(e)=>{
     e.stopPropagation(); haptic();
     if(!m.incomes) m.incomes=[];
     m.incomes.push({id:uid(), name:'Income source', amount:0});
+    incomeEditMode=true; updateIncomeEditToggle(); updateIncomeVisibility();
     renderIncomeRows(); updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
   };
-
-  fg.querySelectorAll('input[data-k]').forEach(inp=>{
-    inp.addEventListener('input',(e)=>{
-      const k=e.target.dataset.k; const v=parseFloat(e.target.value)||0;
-      if(k==='cat'){ if(!m.cats) m.cats={}; m.cats[e.target.dataset.cat]=v; }
-      updateMonthCardLive(month, refs, m);
-      renderHero(); renderTotals();
-      saveStateDebounced();
-    });
-  });
 
   updateHighlights(month, refs, m);
   updateMonthCardLive(month, refs, m);
