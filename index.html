@@ -105,10 +105,18 @@
   .field-grid{padding:14px 16px 18px;display:flex;flex-direction:column;gap:12px;}
   .archive-card .month-card{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,.09);}
 
-  .highlights{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px 0;}
-  .hl-tag{font-size:11.5px;padding:5px 9px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--ink-soft);border:1px solid var(--glass-border);}
-  .hl-tag.warn{background:var(--debit-soft);color:var(--debit);border-color:transparent;}
-  .hl-tag.win{background:var(--credit-soft);color:var(--credit);border-color:transparent;}
+  .donut-wrap{display:flex;align-items:center;gap:14px;padding:12px 16px 4px;}
+  .donut-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:14px 0;width:100%;}
+  .donut-chart{width:78px;height:78px;border-radius:50%;flex-shrink:0;position:relative;box-shadow:0 2px 7px rgba(0,0,0,.16);opacity:.94;}
+  .donut-hole{position:absolute;inset:13px;border-radius:50%;background:rgba(10,14,20,.82);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;}
+  .donut-total{font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2;}
+  .donut-caption{font-size:8px;color:var(--ink-soft);}
+  .donut-legend{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;}
+  .donut-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);}
+  .donut-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .donut-legend-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .donut-legend-val{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;flex-shrink:0;}
 
   .field{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .field label{font-size:14px;color:var(--ink-soft);flex:1;}
@@ -517,48 +525,6 @@ function transfersIntoMonth(targetAccId, year, month){
   return {total, sources:[...new Set(sources)]};
 }
 
-function prevUsedMonth(accId, year, month){
-  const acc=account(accId); const y=acc.years[year]; if(!y) return null;
-  const idx = MONTHS.indexOf(month);
-  for(let i=idx-1;i>=0;i--){ if(y.months[MONTHS[i]]) return y.months[MONTHS[i]]; }
-  return null;
-}
-
-function computeHighlights(accId, year, month, m){
-  const acc=account(accId);
-  const spendCats = acc.categories.filter(c=>!c.linkTo);
-  const transferCats = acc.categories.filter(c=>c.linkTo);
-
-  const items=[];
-  spendCats.forEach(c=>{ const v=catAmount(m,c.id); if(v>0) items.push({name:c.name, val:v}); });
-  const hl=[];
-  if(items.length){ items.sort((a,b)=>b.val-a.val); hl.push({cls:'', text:'Biggest spend: '+items[0].name+' (\u20b9'+fmt(items[0].val)+')'}); }
-
-  const incomeRows=(m.incomes||[]).filter(r=>r.amount>0);
-  if(incomeRows.length>1){
-    const sorted=[...incomeRows].sort((a,b)=>b.amount-a.amount);
-    hl.push({cls:'win', text:'Biggest income: '+sorted[0].name+' (\u20b9'+fmt(sorted[0].amount)+')'});
-  }
-
-  transferCats.forEach(c=>{
-    const v=catAmount(m,c.id);
-    if(v>0){ const target=state.accounts[c.linkTo]; hl.push({cls:'win', text:'Sent \u20b9'+fmt(v)+' to '+(target?target.name:c.name)+' savings'}); }
-  });
-
-  const prev = prevUsedMonth(accId, year, month);
-  if(prev){
-    spendCats.forEach(c=>{
-      const cur=catAmount(m,c.id), before=catAmount(prev,c.id);
-      if(before>0 && cur===0) hl.push({cls:'win', text:c.name+' looks paid off \ud83c\udf89'});
-    });
-  }
-  const tf = transfersIntoMonth(accId, year, month);
-  if(tf.total>0) hl.push({cls:'win', text:'Received \u20b9'+fmt(tf.total)+' from '+tf.sources.join(', ')});
-  const bal = monthOwnBalance(m, acc.categories) + tf.total;
-  if(bal<0) hl.push({cls:'warn', text:'Spent more than came in this month'});
-  return hl;
-}
-
 /* ---------- structural render ---------- */
 
 function applyTheme(){
@@ -638,7 +604,7 @@ function buildMonthCard(month){
   const body=document.createElement('div'); body.className='month-body';
   const inner=document.createElement('div'); inner.className='month-body-inner';
 
-  const hlDiv = document.createElement('div'); hlDiv.className='highlights'; hlDiv.setAttribute('data-role','highlights');
+  const donutEl = buildDonutChart(m, acc.categories);
 
   const fg=document.createElement('div'); fg.className='field-grid';
   const incomeWrap=document.createElement('div');
@@ -669,6 +635,21 @@ function buildMonthCard(month){
   fg.appendChild(spentDiv);
 
   if(acc.categories.length){ const d2=document.createElement('div'); d2.className='divider'; fg.appendChild(d2); }
+  let catBody=null;
+  if(acc.categories.length){
+    const catToggle=document.createElement('div');
+    catToggle.className='totals-line'; catToggle.style.cursor='pointer'; catToggle.style.padding='8px 0';
+    catToggle.innerHTML=`<span>Categories <span data-role="catSectionChevron" style="display:inline-block;transition:transform .2s;font-size:18px;line-height:0;position:relative;top:3px;margin-left:2px;">\u25be</span></span><b>${acc.categories.length}</b>`;
+    catBody=document.createElement('div'); catBody.style.cssText='display:none;flex-direction:column;gap:14px;margin-top:10px;';
+    catToggle.onclick=(e)=>{
+      e.stopPropagation(); haptic();
+      const open = catBody.style.display!=='none';
+      catBody.style.display = open?'none':'flex';
+      catToggle.querySelector('[data-role="catSectionChevron"]').style.transform = open?'':'rotate(180deg)';
+    };
+    fg.appendChild(catToggle);
+    fg.appendChild(catBody);
+  }
   acc.categories.forEach(c=>{
     const linkLabel = c.linkTo && state.accounts[c.linkTo] ? ` \u2192 ${state.accounts[c.linkTo].name}` : '';
     const catDiv=document.createElement('div'); catDiv.className='field cat-field-row';
@@ -712,6 +693,7 @@ function buildMonthCard(month){
       catInput.value='';
       catTotalEl.textContent='\u20b9'+fmt(m.cats[c.id]);
       updateMonthCardLive(month, refs, m);
+      donutEl.refresh();
       renderHero(); renderTotals();
       saveStateDebounced();
     }
@@ -731,17 +713,17 @@ function buildMonthCard(month){
       catInput.focus(); if(catInput.select) catInput.select();
     });
 
-    fg.appendChild(catDiv);
+    catBody.appendChild(catDiv);
   });
   const resultDiv=document.createElement('div'); resultDiv.className='result-row';
   resultDiv.innerHTML=`<span class="label">Remaining balance</span><span class="val" data-role="result">${fmt(bal)}</span>`;
   fg.appendChild(resultDiv);
 
-  inner.appendChild(hlDiv); inner.appendChild(fg);
+  inner.appendChild(donutEl); inner.appendChild(fg);
   body.appendChild(inner);
 
   const refs={ chipEl:row.querySelector('[data-role="chip"]'), metaEl:row.querySelector('[data-role="meta"]'),
-    resultEl:fg.querySelector('[data-role="result"]'), highlightsEl:hlDiv, spentEl:fg.querySelector('[data-role="spentval"]') };
+    resultEl:fg.querySelector('[data-role="result"]'), donutEl:donutEl, spentEl:fg.querySelector('[data-role="spentval"]') };
 
   let incomeEditMode = false;
   function renderIncomeRows(){
@@ -775,7 +757,6 @@ function buildMonthCard(month){
       });
       r.querySelector('[data-role="incname"]').addEventListener('blur', ()=>{
         if(!inc.name.trim()) inc.name='Income source';
-        updateHighlights(month, refs, m);
       });
       r.querySelector('[data-role="incamt"]').addEventListener('input', e=>{
         inc.amount=parseFloat(e.target.value)||0;
@@ -817,7 +798,6 @@ function buildMonthCard(month){
     renderIncomeRows(); updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
   };
 
-  updateHighlights(month, refs, m);
   updateMonthCardLive(month, refs, m);
   card.appendChild(row);
   card.appendChild(body);
@@ -878,12 +858,38 @@ function updateMonthCardLive(month, refs, m){
   if(refs.spentEl) refs.spentEl.textContent=fmt(spent);
   refs.resultEl.textContent=fmt(bal);
   refs.resultEl.style.color = bal>=0 ? 'var(--credit)' : 'var(--debit)';
-  updateHighlights(month, refs, m);
 }
 
-function updateHighlights(month, refs, m){
-  const hl = computeHighlights(currentAccountId, currentYear, month, m);
-  refs.highlightsEl.innerHTML = hl.map(h=>`<span class="hl-tag ${h.cls}">${h.text}</span>`).join('');
+const DONUT_VIVID = ['#FF6B6B','#4ECDC4','#FFD93D','#A78BFA','#6BCB77','#FF8FB1','#5DADE2','#FFB84D'];
+function getDonutPalette(){
+  const t = theme();
+  return [t.accent, ...DONUT_VIVID];
+}
+function buildDonutChart(m, categories){
+  const wrap=document.createElement('div'); wrap.className='donut-wrap';
+  function refresh(){
+    const palette = getDonutPalette();
+    const entries = categories.map((c,i)=>({name:c.name, val:catAmount(m,c.id), color:palette[i%palette.length]})).filter(e=>e.val>0);
+    if(!entries.length){
+      wrap.innerHTML = `<p class="donut-empty">No expenses logged yet this month.</p>`;
+      return;
+    }
+    const total = entries.reduce((s,e)=>s+e.val,0);
+    let cum=0;
+    const stops = entries.map(e=>{
+      const pct=(e.val/total)*100; const start=cum; cum+=pct;
+      return `${e.color} ${start}% ${cum}%`;
+    }).join(', ');
+    const legend = entries.map(e=>`<div class="donut-legend-item"><span class="donut-dot" style="background:${e.color}"></span><span class="donut-legend-name">${e.name}</span><span class="donut-legend-val">\u20b9${fmt(e.val)}</span></div>`).join('');
+    wrap.innerHTML = `
+      <div class="donut-chart" style="background:conic-gradient(${stops});">
+        <div class="donut-hole"><span class="donut-total">\u20b9${fmt(total)}</span><span class="donut-caption">Total spent</span></div>
+      </div>
+      <div class="donut-legend">${legend}</div>`;
+  }
+  refresh();
+  wrap.refresh = refresh;
+  return wrap;
 }
 
 function renderHero(){
@@ -1003,10 +1009,22 @@ document.getElementById('deleteAccountBtn').onclick=()=>{
 };
 
 /* ---------- modals: recurring categories ---------- */
+let categoryDraft = [];
+function syncDraftFromDOM(){
+  const rows=[...document.getElementById('recurringFields').children];
+  rows.forEach(row=>{
+    const catId=row.dataset.catId;
+    const nameInp=row.querySelector('[data-role="name"]');
+    const linkSel=row.querySelector('[data-role="link"]');
+    const item = categoryDraft.find(c=>c.id===catId);
+    if(item){ item.name = nameInp.value.trim() || item.name; item.linkTo = linkSel.value || null; }
+  });
+  const domOrder = rows.map(r=>r.dataset.catId);
+  categoryDraft.sort((a,b)=> domOrder.indexOf(a.id) - domOrder.indexOf(b.id));
+}
 function renderCategoryFields(){
   const el=document.getElementById('recurringFields'); el.innerHTML='';
-  const cats=account().categories;
-  cats.forEach((c)=>{
+  categoryDraft.forEach((c)=>{
     const row=document.createElement('div'); row.className='cat-row';
     const otherAccounts = Object.entries(state.accounts).filter(([id])=>id!==currentAccountId);
     row.innerHTML=`
@@ -1019,7 +1037,12 @@ function renderCategoryFields(){
         <option value="">No link \u2014 stays in this account</option>
         ${otherAccounts.map(([id,a])=>`<option value="${id}" ${c.linkTo===id?'selected':''}>Send to ${a.name} as income</option>`).join('')}
       </select>`;
-    row.querySelector('[data-role="remove"]').onclick=()=>{ haptic(); row.remove(); row.dataset.removed='1'; };
+    row.querySelector('[data-role="remove"]').onclick=()=>{
+      haptic();
+      syncDraftFromDOM();
+      categoryDraft = categoryDraft.filter(x=>x.id!==c.id);
+      renderCategoryFields();
+    };
     row.dataset.catId=c.id;
     el.appendChild(row);
     makeRowDraggable(row, el);
@@ -1083,24 +1106,21 @@ document.getElementById('totExpenseRow').onclick=()=>{
   el.style.display = open? 'none':'block';
   chevron.style.transform = open? '' : 'rotate(180deg)';
 };
-document.getElementById('settingsBtn').onclick=()=>{ renderCategoryFields(); openModal('settingsModal'); };
+document.getElementById('settingsBtn').onclick=()=>{
+  categoryDraft = account().categories.map(c=>({...c}));
+  renderCategoryFields();
+  openModal('settingsModal');
+};
 document.getElementById('closeSettings').onclick=()=>closeModal('settingsModal');
 document.getElementById('addCatBtn').onclick=()=>{
   haptic();
-  const id=uid();
-  account().categories.push({id, name:'New category', linkTo:null});
+  syncDraftFromDOM();
+  categoryDraft.push({id:uid(), name:'New category', linkTo:null});
   renderCategoryFields();
 };
 document.getElementById('saveSettings').onclick=()=>{
-  const rows=[...document.getElementById('recurringFields').children];
-  const kept = [];
-  rows.forEach(row=>{
-    const catId=row.dataset.catId;
-    const nameInp=row.querySelector('[data-role="name"]');
-    const linkSel=row.querySelector('[data-role="link"]');
-    const existing = account().categories.find(c=>c.id===catId);
-    if(existing){ existing.name = nameInp.value.trim() || existing.name; existing.linkTo = linkSel.value || null; kept.push(existing); }
-  });
+  syncDraftFromDOM();
+  const kept = categoryDraft;
   if(kept.length < account().categories.length){
     const removedCount = account().categories.length - kept.length;
     snapshotForUndo(removedCount===1 ? 'Removed a category' : `Removed ${removedCount} categories`);
