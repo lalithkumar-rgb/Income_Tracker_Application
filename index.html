@@ -29,7 +29,24 @@
   .bg-grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.045;mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 
-  .app{position:relative;z-index:1;max-width:430px;margin:0 auto;min-height:100vh;padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 40px);}
+  .app{position:relative;z-index:1;max-width:430px;margin:0 auto;min-height:100vh;padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 108px);}
+
+  .bottom-tabbar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:rgba(255,255,255,.14);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+    border-top:1px solid rgba(255,255,255,.28);padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 10px);}
+  .cam-btn{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:none;background:rgba(255,255,255,.16);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:transform .15s var(--spring);}
+  .cam-btn svg{width:19px;height:19px;display:block;}
+  .cam-btn:active{transform:scale(.9);}
+  .cam-pill-outer{flex:0 0 auto;width:150px;display:flex;align-items:center;justify-content:center;height:46px;}
+  .cam-pill{display:flex;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+    background:rgba(255,255,255,.16);border-radius:999px;height:44px;width:150px;box-sizing:border-box;}
+  .cam-pill::-webkit-scrollbar{display:none;}
+  .pill-name{flex:0 0 75px;width:75px;scroll-snap-align:start;background:none;border:none;border-radius:999px;font-family:inherit;
+    font-size:13.5px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.45);padding:0 6px;height:36px;
+    display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    transition:color .2s,background .2s;}
+  .pill-name.active{color:var(--accent);background:rgba(255,255,255,.24);}
 
   header.hero{padding:6px 4px 18px;}
   .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:6px;}
@@ -197,6 +214,24 @@
   .theme-swatch.selected{border-color:var(--dark-ink);}
   .theme-swatch span{position:absolute;bottom:2px;left:0;right:0;font-size:8px;text-align:center;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.5);}
 
+  #accountsHomeScreen{position:fixed;inset:0;z-index:55;background:var(--paper);overflow-y:auto;
+    padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 30px);}
+  .home-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .home-title{font-size:22px;font-weight:600;color:var(--ink);margin:0;}
+  .overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+  .overview-tile{aspect-ratio:1/.85;border-radius:16px;border:2px solid transparent;padding:14px;display:flex;flex-direction:column;
+    justify-content:flex-end;gap:2px;text-align:left;font-family:inherit;position:relative;overflow:hidden;transition:transform .15s var(--spring);}
+  .overview-tile::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.45),rgba(0,0,0,0) 60%);}
+  .overview-tile:active{transform:scale(.96);}
+  .overview-tile.active{border-color:#fff;}
+  .overview-tile-name,.overview-tile-bal,.overview-tile-sub{position:relative;z-index:1;color:#fff;}
+  .overview-tile-name{font-size:15px;font-weight:700;}
+  .overview-tile-bal{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .overview-tile-sub{font-size:10.5px;opacity:.75;}
+  .overview-tile-add{background:#EEF0F1!important;align-items:center;justify-content:center;color:var(--dark-soft);gap:6px;}
+  .overview-tile-add::before{content:none;}
+  .overview-tile-add span{position:static;color:var(--dark-soft);}
+
   .empty{text-align:center;padding:40px 10px;color:var(--ink-soft);font-size:14px;}
   .storage-note{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:22px;opacity:.8;line-height:1.5;}
 
@@ -250,14 +285,6 @@
       </div>
       <p class="transfer-note" id="heroTransferNote" style="display:none;"></p>
     </div>
-
-    <div class="switcher-row">
-      <div class="segmented" id="accountSwitcher"></div>
-      <button class="icon-btn" id="editAccountBtn" title="Rename / theme">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13.5 3.5 16.5 6.5 6.5 16.5 3 17l.5-3.5Z"/></svg>
-      </button>
-      <button class="seg-add" id="addAccountBtn">+</button>
-    </div>
   </header>
 
   <div class="years" id="yearTabs"></div>
@@ -292,6 +319,8 @@
   </div>
 </div>
 
+<nav class="bottom-tabbar" id="bottomTabbar"></nav>
+
 <div class="modal-backdrop" id="lockModal"><div class="modal"><div class="modal-handle"></div>
   <h2 class="serif" id="lockModalTitle">Set a passcode</h2>
   <p style="font-size:12.5px;color:var(--ink-soft);margin:-6px 0 14px;line-height:1.5;">This adds a simple passcode screen so someone glancing at your phone can't casually open the app. It isn't encryption \u2014 your real protection is your iPhone's own passcode / Face ID, which already keeps this page from opening on a locked phone.</p>
@@ -314,20 +343,31 @@
 
 <div class="modal-backdrop" id="addAccountModal"><div class="modal"><div class="modal-handle"></div>
   <h2 class="serif">Add an account</h2>
-  <div class="field"><label>Name</label><input type="text" id="newAccountInput" placeholder="e.g. Travel Fund" style="width:160px;text-align:left;"></div>
-  <p style="font-size:12px;color:var(--ink-soft);margin:14px 0 6px;">Theme</p>
+  <div class="field" style="margin-bottom:6px;"><label>Name</label><input type="text" id="newAccountInput" placeholder="e.g. Travel Fund" style="width:160px;text-align:left;"></div>
+  <p style="font-size:12px;color:var(--ink-soft);margin:22px 0 12px;">Theme</p>
   <div class="theme-grid" id="newAccountThemeGrid"></div>
-  <div class="modal-actions"><button class="btn-cancel" id="closeAddAccount">Cancel</button><button class="btn-save" id="saveAddAccount">Add</button></div>
+  <div class="modal-actions" style="margin-top:24px;"><button class="btn-cancel" id="closeAddAccount">Cancel</button><button class="btn-save" id="saveAddAccount">Add</button></div>
 </div></div>
 
 <div class="modal-backdrop" id="editAccountModal"><div class="modal"><div class="modal-handle"></div>
   <h2 class="serif">Edit account</h2>
-  <div class="field"><label>Name</label><input type="text" id="editAccountInput" style="width:160px;text-align:left;"></div>
-  <p style="font-size:12px;color:var(--ink-soft);margin:14px 0 6px;">Theme</p>
+  <div class="field" style="margin-bottom:6px;"><label>Name</label><input type="text" id="editAccountInput" style="width:160px;text-align:left;"></div>
+  <p style="font-size:12px;color:var(--ink-soft);margin:22px 0 12px;">Theme</p>
   <div class="theme-grid" id="editAccountThemeGrid"></div>
-  <div class="modal-actions"><button class="btn-cancel" id="closeEditAccount">Cancel</button><button class="btn-save" id="saveEditAccount">Save</button></div>
-  <button id="deleteAccountBtn" style="width:100%;margin-top:10px;padding:11px;border-radius:12px;border:none;background:#FBE4E1;color:#B3261E;font-size:13.5px;font-weight:700;font-family:inherit;">Delete this account</button>
+  <div class="modal-actions" style="margin-top:24px;"><button class="btn-cancel" id="closeEditAccount">Cancel</button><button class="btn-save" id="saveEditAccount">Save</button></div>
+  <button id="addAnotherAccountBtn" class="add-cat-btn" style="width:100%;margin-top:18px;">+ Add another account</button>
+  <button id="deleteAccountBtn" style="width:100%;margin-top:14px;padding:11px;border-radius:12px;border:none;background:#FBE4E1;color:#B3261E;font-size:13.5px;font-weight:700;font-family:inherit;">Delete this account</button>
 </div></div>
+
+<div id="accountsHomeScreen" style="display:none;">
+  <div class="home-header">
+    <p class="serif home-title">All accounts</p>
+    <button class="cam-btn" id="closeAccountsHome" title="Close">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5 5 15"/></svg>
+    </button>
+  </div>
+  <div class="overview-grid" id="accountsOverviewGrid"></div>
+</div>
 
 <script>
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -534,15 +574,151 @@ function applyTheme(){
   if(sceneEl.dataset.theme !== t.key){ sceneEl.innerHTML = SCENES[t.key]; sceneEl.dataset.theme = t.key; }
 }
 
-function renderAccountSwitcher(){
-  const el = document.getElementById('accountSwitcher'); el.innerHTML='';
-  Object.keys(state.accounts).forEach(id=>{
-    const b=document.createElement('button');
-    b.className='seg-btn'+(id===currentAccountId?' active':'');
-    b.textContent = state.accounts[id].name;
-    b.onclick=()=>{ if(id===currentAccountId) return; haptic(); currentAccountId=id; currentYear=realNow().year; renderStructural(); };
-    el.appendChild(b);
+const PILL_ITEM_WIDTH = 75;
+
+function renderBottomTabbar(){
+  const nav = document.getElementById('bottomTabbar'); nav.innerHTML='';
+
+  const homeBtn = document.createElement('button');
+  homeBtn.className='cam-btn'; homeBtn.title='All accounts';
+  homeBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>`;
+  homeBtn.onclick = ()=>{ haptic(); openAccountsOverview(); };
+
+  const pillOuter = document.createElement('div'); pillOuter.className='cam-pill-outer';
+  const pill = document.createElement('div'); pill.className='cam-pill'; pill.id='camPill';
+  const ids = Object.keys(state.accounts);
+  let activeIdx = 0;
+  ids.forEach((id,idx)=>{
+    if(id===currentAccountId) activeIdx = idx;
+    const btn = document.createElement('button');
+    btn.className='pill-name'+(id===currentAccountId?' active':'');
+    btn.textContent = state.accounts[id].name;
+    btn.title = state.accounts[id].name;
+    btn.dataset.id = id;
+    btn.onclick = ()=>{ haptic(); if(id!==currentAccountId) switchAccountAnimated(id); };
+    pill.appendChild(btn);
   });
+  pillOuter.appendChild(pill);
+
+  const editBtn = document.createElement('button');
+  editBtn.className='cam-btn'; editBtn.title='Edit account';
+  editBtn.innerHTML = `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13.5 3.5 16.5 6.5 6.5 16.5 3 17l.5-3.5Z"/></svg>`;
+  editBtn.onclick = ()=>{ haptic(); openEditAccountModal(); };
+
+  nav.appendChild(homeBtn); nav.appendChild(pillOuter); nav.appendChild(editBtn);
+
+  let isProgrammaticScroll = true;
+  pill.scrollLeft = activeIdx * PILL_ITEM_WIDTH;
+  setTimeout(()=>{ isProgrammaticScroll=false; }, 100);
+
+  function settleToNearestAccount(){
+    if(isProgrammaticScroll) return;
+    const idx = Math.round(pill.scrollLeft / PILL_ITEM_WIDTH);
+    const targetId = ids[Math.max(0, Math.min(ids.length-1, idx))];
+    if(targetId && targetId!==currentAccountId) switchAccountFromSwipe(targetId, pill);
+  }
+  if('onscrollend' in window){
+    pill.addEventListener('scrollend', settleToNearestAccount, {passive:true});
+  } else {
+    let scrollTimer=null;
+    pill.addEventListener('scroll', ()=>{
+      if(isProgrammaticScroll) return;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(settleToNearestAccount, 120);
+    }, {passive:true});
+  }
+}
+
+function openAccountsOverview(){
+  const grid = document.getElementById('accountsOverviewGrid'); grid.innerHTML='';
+  Object.entries(state.accounts).forEach(([id,acc])=>{
+    const t = THEME_BY_KEY[acc.theme] || THEMES[0];
+    const y = acc.years[currentYear] || {months:{}};
+    let income=0, out=0;
+    Object.values(y.months).forEach(m=>{
+      income += monthIncomeTotal(m);
+      acc.categories.forEach(c=> out += catAmount(m,c.id));
+    });
+    const tile = document.createElement('button');
+    tile.className='overview-tile'+(id===currentAccountId?' active':'');
+    tile.style.background = t.swatchGrad;
+    tile.innerHTML = `<span class="overview-tile-name">${acc.name}</span>
+      <span class="overview-tile-bal">\u20b9${fmt(income-out)}</span>
+      <span class="overview-tile-sub">Net this year</span>`;
+    tile.onclick = ()=>{
+      haptic(); closeAccountsOverview();
+      if(id!==currentAccountId) switchAccountAnimated(id);
+    };
+    grid.appendChild(tile);
+  });
+  const addTile = document.createElement('button');
+  addTile.className='overview-tile overview-tile-add';
+  addTile.innerHTML = `<span style="font-size:26px;">+</span><span class="overview-tile-sub">Add account</span>`;
+  addTile.onclick = ()=>{ closeAccountsOverview(); openAddAccountModal(); };
+  grid.appendChild(addTile);
+  document.getElementById('accountsHomeScreen').style.display = 'block';
+}
+function closeAccountsOverview(){
+  document.getElementById('accountsHomeScreen').style.display = 'none';
+}
+document.getElementById('closeAccountsHome').onclick = ()=>{ haptic(); closeAccountsOverview(); };
+
+function switchAccountFromSwipe(newId, pillEl){
+  if(newId===currentAccountId) return;
+  haptic(true);
+  currentAccountId = newId;
+  currentYear = realNow().year;
+  applyTheme();
+  renderYearTabs();
+  renderMonthList();
+  renderHero();
+  renderTotals();
+  saveStateNow();
+  if(pillEl){
+    [...pillEl.children].forEach(btn=>{
+      btn.classList.toggle('active', btn.dataset.id===currentAccountId);
+    });
+  }
+}
+
+function switchAccountAnimated(newId){
+  if(newId===currentAccountId) return;
+  haptic(true);
+  currentAccountId = newId;
+  currentYear = realNow().year;
+  renderStructural();
+}
+
+function enableAccountSwipe(){
+  const el = document.querySelector('.app');
+  let startX=0, startY=0, tracking=false, decided=false, horizontal=false;
+  el.addEventListener('pointerdown', e=>{
+    if(e.target.closest('input,select,textarea,button,.month-card,.modal')) return;
+    startX=e.clientX; startY=e.clientY; tracking=true; decided=false; horizontal=false;
+  });
+  el.addEventListener('pointermove', e=>{
+    if(!tracking) return;
+    const dx=e.clientX-startX, dy=e.clientY-startY;
+    if(!decided){
+      if(Math.abs(dx)>12 || Math.abs(dy)>12){
+        decided=true;
+        horizontal = Math.abs(dx) > Math.abs(dy)*1.4;
+      }
+    }
+  });
+  function endSwipe(e){
+    if(!tracking) return;
+    tracking=false;
+    if(!horizontal) return;
+    const dx = (e.clientX||startX)-startX;
+    if(Math.abs(dx) < 60) return;
+    const ids = Object.keys(state.accounts);
+    const idx = ids.indexOf(currentAccountId);
+    if(dx < 0 && idx < ids.length-1){ switchAccountAnimated(ids[idx+1]); }
+    else if(dx > 0 && idx > 0){ switchAccountAnimated(ids[idx-1]); }
+  }
+  el.addEventListener('pointerup', endSwipe);
+  el.addEventListener('pointercancel', ()=>{ tracking=false; });
 }
 
 function renderYearTabs(){
@@ -935,7 +1111,7 @@ function renderTotals(){
 
 function renderStructural(){
   applyTheme();
-  renderAccountSwitcher();
+  renderBottomTabbar();
   renderYearTabs();
   renderMonthList();
   renderHero();
@@ -963,30 +1139,43 @@ function renderThemeGrid(gridEl, selectedKey, onPick){
   });
 }
 let pendingNewTheme = THEMES[Object.keys((state||{accounts:{}}).accounts||{}).length % THEMES.length]?.key || 'skyline';
-document.getElementById('addAccountBtn').onclick=()=>{
+function openAddAccountModal(){
   document.getElementById('newAccountInput').value='';
   pendingNewTheme = THEMES[Object.keys(state.accounts).length % THEMES.length].key;
   renderThemeGrid(document.getElementById('newAccountThemeGrid'), pendingNewTheme, (k)=>pendingNewTheme=k);
   openModal('addAccountModal');
-};
+}
 document.getElementById('closeAddAccount').onclick=()=>closeModal('addAccountModal');
 document.getElementById('saveAddAccount').onclick=()=>{
   const name=document.getElementById('newAccountInput').value.trim(); if(!name) return;
   const id=uid(); const y=new Date().getFullYear();
   state.accounts[id]={ name, theme:pendingNewTheme, years:{[y]:{months:{}, visible:[]}}, categories: freshCategories() };
   currentAccountId=id; currentYear=String(y);
+  ensureCalendarMonths();
   saveStateNow(); closeModal('addAccountModal'); renderStructural();
 };
+document.getElementById('newAccountInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ e.preventDefault(); document.getElementById('saveAddAccount').click(); }
+});
+document.getElementById('newAccountInput').addEventListener('focus', function(){
+  const el=this;
+  setTimeout(()=>{ try{ el.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){} }, 300);
+});
 
 /* ---------- modals: edit account ---------- */
 let pendingEditTheme=null;
-document.getElementById('editAccountBtn').onclick=()=>{
+function openEditAccountModal(){
   document.getElementById('editAccountInput').value = account().name;
   pendingEditTheme = account().theme;
   renderThemeGrid(document.getElementById('editAccountThemeGrid'), pendingEditTheme, (k)=>pendingEditTheme=k);
   openModal('editAccountModal');
-};
+}
 document.getElementById('closeEditAccount').onclick=()=>closeModal('editAccountModal');
+document.getElementById('addAnotherAccountBtn').onclick=()=>{
+  haptic();
+  closeModal('editAccountModal');
+  openAddAccountModal();
+};
 document.getElementById('saveEditAccount').onclick=()=>{
   const name=document.getElementById('editAccountInput').value.trim();
   if(name) account().name=name;
@@ -1204,6 +1393,7 @@ document.getElementById('undoToastBtn').onclick=()=>{
   currentAccountId = state.currentAccountId || Object.keys(state.accounts)[0];
   currentYear = realNow().year;
   renderStructural();
+  enableAccountSwipe();
   if(state.security.pinHash){ document.getElementById('lockOverlay').style.display='flex'; }
 })();
 
