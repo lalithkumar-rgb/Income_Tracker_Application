@@ -778,23 +778,27 @@ function themeIconSVG(themeKey){
 function accountYearBalance(id, year){
   const acc = state.accounts[id];
   const y = acc.years[year] || {months:{}};
-  let income=0, out=0;
-  Object.values(y.months).forEach(m=>{
+  let income=0, out=0, transfers=0;
+  Object.keys(y.months).forEach(mo=>{
+    const m = y.months[mo];
     income += monthIncomeTotal(m);
     acc.categories.forEach(c=> out += catAmount(m,c.id));
+    transfers += transfersIntoMonth(id, year, mo).total;
   });
-  return income-out;
+  return income+transfers-out;
 }
 function computeGrandTotal(){
   return Object.keys(state.accounts).reduce((sum,id)=> sum+accountYearBalance(id,currentYear), 0);
 }
 function monthNetAllAccounts(year, month){
   let net=0;
-  Object.values(state.accounts).forEach(acc=>{
+  Object.entries(state.accounts).forEach(([id,acc])=>{
     const y=acc.years[year]; const m = y && y.months[month];
-    if(!m) return;
-    net += monthIncomeTotal(m);
-    acc.categories.forEach(c=> net -= catAmount(m,c.id));
+    if(m){
+      net += monthIncomeTotal(m);
+      acc.categories.forEach(c=> net -= catAmount(m,c.id));
+    }
+    net += transfersIntoMonth(id, year, month).total;
   });
   return net;
 }
