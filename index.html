@@ -787,8 +787,21 @@ function accountYearBalance(id, year){
   });
   return income+transfers-out;
 }
+function accountAllTimeBalance(id){
+  const acc = state.accounts[id];
+  let income=0, out=0, transfers=0;
+  Object.keys(acc.years).forEach(year=>{
+    Object.keys(acc.years[year].months).forEach(mo=>{
+      const m = acc.years[year].months[mo];
+      income += monthIncomeTotal(m);
+      acc.categories.forEach(c=> out += catAmount(m,c.id));
+      transfers += transfersIntoMonth(id, year, mo).total;
+    });
+  });
+  return income+transfers-out;
+}
 function computeGrandTotal(){
-  return Object.keys(state.accounts).reduce((sum,id)=> sum+accountYearBalance(id,currentYear), 0);
+  return Object.keys(state.accounts).reduce((sum,id)=> sum+accountAllTimeBalance(id), 0);
 }
 function monthNetAllAccounts(year, month){
   let net=0;
@@ -870,7 +883,7 @@ function renderHomeOverview(){
   const grid = document.getElementById('accountsOverviewGrid'); grid.innerHTML='';
   Object.entries(state.accounts).forEach(([id,acc])=>{
     const t = THEME_BY_KEY[acc.theme] || THEMES[0];
-    const bal = accountYearBalance(id, currentYear);
+    const bal = accountAllTimeBalance(id);
     const sub = acc.lastTransaction ? ('Last: '+formatRelativeTime(acc.lastTransaction.ts)) : (acc.categories.length+' categories');
     const tile = document.createElement('button');
     tile.className='acct-tile';
