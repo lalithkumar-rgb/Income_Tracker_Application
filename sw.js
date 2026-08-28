@@ -1,4 +1,4 @@
-const CACHE = 'ledger-cache-v2026-08-27';
+const CACHE = 'ledger-cache-v2026-08-27c';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', e=>{

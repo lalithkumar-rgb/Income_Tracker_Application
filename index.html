@@ -67,6 +67,8 @@
   .balance-sub{display:flex;gap:18px;margin-top:14px;font-size:13px;opacity:.85;position:relative;}
   .balance-sub span b{font-variant-numeric:tabular-nums;font-weight:600;}
   .transfer-note{font-size:11.5px;opacity:.75;margin-top:8px;position:relative;}
+  .last-txn-note{font-size:12.5px;opacity:.9;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.16);position:relative;}
+  .last-txn-note b{color:var(--accent);font-weight:600;}
 
   .switcher-row{display:flex;align-items:center;gap:8px;margin-top:16px;}
   .segmented{flex:1;display:flex;gap:4px;background:var(--card-glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
@@ -174,7 +176,7 @@
     background:var(--card-glass);backdrop-filter:blur(14px);color:var(--accent);font-size:14px;font-weight:600;font-family:inherit;transition:transform .15s var(--spring),background .2s;}
   .add-month-btn:active{transform:scale(.98);}
 
-  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;z-index:10;
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;z-index:60;
     opacity:0;pointer-events:none;transition:opacity .25s var(--spring);}
   .modal-backdrop.show{opacity:1;pointer-events:auto;}
   .modal{background:rgba(255,255,255,.96);backdrop-filter:blur(24px);width:100%;max-width:430px;margin:0 auto;border-radius:20px 20px 0 0;
@@ -226,23 +228,64 @@
   .theme-swatch.selected{border-color:var(--dark-ink);}
   .theme-swatch span{position:absolute;bottom:2px;left:0;right:0;font-size:8px;text-align:center;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.5);}
 
-  #accountsHomeScreen{position:fixed;inset:0;z-index:55;background:var(--paper);overflow-y:auto;
+  #accountsHomeScreen,#yearlySummaryScreen{position:fixed;inset:0;z-index:55;background:var(--paper);overflow-y:auto;
     padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 30px);}
   .home-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
   .home-title{font-size:22px;font-weight:600;color:var(--ink);margin:0;}
+
+  .total-balance-card{background:var(--card-glass);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-radius:20px;border:1px solid var(--glass-border);padding:18px 18px 8px;position:relative;overflow:hidden;}
+  .tbc-top{display:flex;align-items:center;gap:7px;}
+  .tbc-label{font-size:13px;color:var(--ink-soft);}
+  .tbc-eye{background:none;border:none;padding:2px;color:var(--ink-soft);display:flex;}
+  .tbc-eye svg{width:16px;height:16px;}
+  .tbc-amount{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);margin:8px 0 4px;letter-spacing:-.01em;}
+  .tbc-trend{font-size:12.5px;font-weight:600;margin:0 0 4px;}
+  .tbc-trend.up{color:var(--credit);}
+  .tbc-trend.down{color:var(--debit);}
+  .tbc-spark{margin:6px -18px -2px;}
+
+  .accounts-section-header{display:flex;align-items:center;justify-content:space-between;margin:22px 4px 10px;}
+  .section-title{font-size:17px;font-weight:600;color:var(--ink);margin:0;}
+  .manage-link{background:none;border:none;padding:0;font-size:13.5px;font-weight:600;color:var(--accent);font-family:inherit;}
+
   .overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
-  .overview-tile{aspect-ratio:1/.85;border-radius:16px;border:2px solid transparent;padding:14px;display:flex;flex-direction:column;
-    justify-content:flex-end;gap:2px;text-align:left;font-family:inherit;position:relative;overflow:hidden;transition:transform .15s var(--spring);}
-  .overview-tile::before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.45),rgba(0,0,0,0) 60%);}
-  .overview-tile:active{transform:scale(.96);}
-  .overview-tile.active{border-color:#fff;}
-  .overview-tile-name,.overview-tile-bal,.overview-tile-sub{position:relative;z-index:1;color:#fff;}
-  .overview-tile-name{font-size:15px;font-weight:700;}
-  .overview-tile-bal{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;}
-  .overview-tile-sub{font-size:10.5px;opacity:.75;}
-  .overview-tile-add{background:#EEF0F1!important;align-items:center;justify-content:center;color:var(--dark-soft);gap:6px;}
-  .overview-tile-add::before{content:none;}
-  .overview-tile-add span{position:static;color:var(--dark-soft);}
+  .acct-tile{background:var(--card-glass);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-radius:16px;border:1px solid var(--glass-border);padding:14px;display:flex;flex-direction:column;gap:16px;
+    text-align:left;font-family:inherit;transition:transform .15s var(--spring);}
+  .acct-tile:active{transform:scale(.96);}
+  .acct-tile-top{display:flex;align-items:center;gap:10px;}
+  .acct-tile-icon{width:36px;height:36px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.25);}
+  .acct-tile-icon svg{width:17px;height:17px;stroke:#fff;}
+  .acct-tile-names{display:flex;flex-direction:column;min-width:0;}
+  .acct-tile-name{font-size:14px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .acct-tile-sub{font-size:10.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .acct-tile-bottom{display:flex;align-items:center;justify-content:space-between;}
+  .acct-tile-balance{font-size:16.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);}
+  .acct-tile-chevron{color:var(--ink-soft);font-size:17px;line-height:1;}
+
+  .quick-actions-card{background:var(--card-glass);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-radius:16px;border:1px solid var(--glass-border);margin-top:22px;overflow:hidden;}
+  .quick-action-row{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;background:none;border:none;
+    text-align:left;font-family:inherit;transition:transform .12s var(--spring);}
+  .quick-action-row:active{transform:scale(.98);}
+  .qa-icon{width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .qa-icon svg{width:18px;height:18px;stroke:#fff;}
+  .qa-icon-cash{background:linear-gradient(160deg,#2E7D5B,#1B4D38);}
+  .qa-icon-yearly{background:linear-gradient(160deg,#3A5FCD,#233C86);}
+  .qa-text{flex:1;min-width:0;}
+  .qa-text b{display:block;font-size:14.5px;font-weight:600;color:var(--ink);}
+  .qa-text span{display:block;font-size:12px;color:var(--ink-soft);margin-top:1px;}
+  .qa-chevron{color:var(--ink-soft);font-size:17px;flex-shrink:0;}
+  .qa-divider{height:1px;background:var(--rule);margin:0 16px;}
+
+  .modal .field select{flex:1;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:9px 10px;font-size:14px;
+    font-family:inherit;color:var(--dark-ink);background:#fff;}
+  .qa-type-toggle{display:flex;gap:8px;margin:2px 0 4px;}
+  .qa-type-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(0,0,0,.12);background:#fff;
+    color:var(--dark-soft);font-weight:600;font-size:13.5px;font-family:inherit;transition:transform .15s var(--spring),background .2s,color .2s,border-color .2s;}
+  .qa-type-btn:active{transform:scale(.97);}
+  .qa-type-btn.active{background:var(--dark-ink);color:#fff;border-color:var(--dark-ink);}
 
   .empty{text-align:center;padding:40px 10px;color:var(--ink-soft);font-size:14px;}
   .storage-note{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:22px;opacity:.8;line-height:1.5;}
@@ -295,6 +338,7 @@
         <span>Income <b id="heroIncome">0</b></span>
         <span>Out <b id="heroOut">0</b></span>
       </div>
+      <p class="last-txn-note" id="heroLastTxn" style="display:none;"></p>
       <p class="transfer-note" id="heroTransferNote" style="display:none;"></p>
     </div>
   </header>
@@ -380,13 +424,85 @@
 
 <div id="accountsHomeScreen" style="display:none;">
   <div class="home-header">
-    <p class="serif home-title">All accounts</p>
-    <button class="cam-btn" id="closeAccountsHome" title="Close">
+    <p class="serif home-title">Home</p>
+    <div style="display:flex;gap:8px;">
+      <button class="cam-btn" id="homeBellBtn" title="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <button class="cam-btn" id="closeAccountsHome" title="Close">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5 5 15"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="total-balance-card">
+    <div class="tbc-top">
+      <span class="tbc-label">Total Balance</span>
+      <button class="tbc-eye" id="balanceEyeBtn" title="Show/hide balance">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <p class="tbc-amount" id="tbcAmount">₹0</p>
+    <p class="tbc-trend" id="tbcTrend"></p>
+    <div class="tbc-spark" id="tbcSpark"></div>
+  </div>
+
+  <div class="accounts-section-header">
+    <p class="serif section-title">All Accounts</p>
+    <button class="manage-link" id="manageAccountsLink">Manage</button>
+  </div>
+  <div class="overview-grid" id="accountsOverviewGrid"></div>
+
+  <div class="quick-actions-card">
+    <button class="quick-action-row" id="cashTxnRow">
+      <span class="qa-icon qa-icon-cash">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 6v0M18 6v0M6 18v0M18 18v0"/></svg>
+      </span>
+      <span class="qa-text"><b>Cash Transactions</b><span>Record income or expense</span></span>
+      <span class="qa-chevron">›</span>
+    </button>
+    <div class="qa-divider"></div>
+    <button class="quick-action-row" id="yearlyTxnRow">
+      <span class="qa-icon qa-icon-yearly">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+      </span>
+      <span class="qa-text"><b>Yearly Transactions</b><span>View yearly summary &amp; reports</span></span>
+      <span class="qa-chevron">›</span>
+    </button>
+  </div>
+</div>
+
+<div id="yearlySummaryScreen" style="display:none;">
+  <div class="home-header">
+    <p class="serif home-title">Yearly Transactions</p>
+    <button class="cam-btn" id="closeYearlySummary" title="Close">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5 5 15"/></svg>
     </button>
   </div>
-  <div class="overview-grid" id="accountsOverviewGrid"></div>
+  <div class="years" id="yearlySummaryYearTabs"></div>
+  <div class="totals-card" style="display:block;">
+    <p class="totals-title">All accounts — <span id="ysYear"></span></p>
+    <div class="totals-line"><span>Total income</span><b id="ysIncome">0</b></div>
+    <div class="totals-line"><span>Total expenses</span><b id="ysExpense">0</b></div>
+    <div class="totals-line final"><span>Net balance</span><b id="ysNet">0</b></div>
+  </div>
+  <div class="month-list" id="yearlySummaryAccountList" style="margin-top:14px;"></div>
 </div>
+
+<div class="modal-backdrop" id="quickAddModal"><div class="modal"><div class="modal-handle"></div>
+  <h2 class="serif">Record a transaction</h2>
+  <div class="field" style="margin-bottom:12px;"><label>Account</label><select id="qaAccountSelect"></select></div>
+  <div class="qa-type-toggle">
+    <button type="button" class="qa-type-btn active" data-type="expense">Expense</button>
+    <button type="button" class="qa-type-btn" data-type="income">Income</button>
+  </div>
+  <div class="field" id="qaCategoryField" style="margin-bottom:12px;"><label>Category</label><select id="qaCategorySelect"></select></div>
+  <div class="field" id="qaIncomeNameField" style="margin-bottom:12px;display:none;"><label>Source</label><input type="text" id="qaIncomeNameInput" placeholder="e.g. Salary" style="width:160px;text-align:left;"></div>
+  <div class="field" style="margin-bottom:4px;"><label>Amount</label><input type="number" inputmode="decimal" id="qaAmountInput" placeholder="0"></div>
+  <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 0;">Logged to <b id="qaMonthLabel"></b></p>
+  <div class="modal-actions" style="margin-top:22px;"><button class="btn-cancel" id="closeQuickAdd">Cancel</button><button class="btn-save" id="saveQuickAdd">Save</button></div>
+</div></div>
+
 
 <script>
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -648,39 +764,260 @@ function renderBottomTabbar(){
   }
 }
 
-function openAccountsOverview(){
+const THEME_ICONS = {
+  nyc: '<path d="M4 21V9l5-4v16M9 21V5l6 4v12M15 9l5 3v9"/>',
+  sakura: '<circle cx="12" cy="12" r="3"/><path d="M12 3c1.5 2 1.5 4 0 6M12 21c1.5-2 1.5-4 0-6M3 12c2-1.5 4-1.5 6 0M21 12c-2 1.5-4 1.5-6 0M6 6c2 0 3 1 3 3M18 18c-2 0-3-1-3-3M6 18c2 0 3-1 3-3M18 6c-2 0-3 1-3 3"/>',
+  rainforest: '<path d="M12 2C7 2 4 7 4 12c0 5 3.5 9 8 10 4.5-1 8-5 8-10 0-5-3-10-8-10Z"/><path d="M12 8v14"/>',
+  snowmtn: '<path d="M3 19h18L14.5 6 11 12 8 8 3 19Z"/>'
+};
+function themeIconSVG(themeKey){
+  const p = THEME_ICONS[themeKey] || THEME_ICONS.nyc;
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+
+function accountYearBalance(id, year){
+  const acc = state.accounts[id];
+  const y = acc.years[year] || {months:{}};
+  let income=0, out=0;
+  Object.values(y.months).forEach(m=>{
+    income += monthIncomeTotal(m);
+    acc.categories.forEach(c=> out += catAmount(m,c.id));
+  });
+  return income-out;
+}
+function computeGrandTotal(){
+  return Object.keys(state.accounts).reduce((sum,id)=> sum+accountYearBalance(id,currentYear), 0);
+}
+function monthNetAllAccounts(year, month){
+  let net=0;
+  Object.values(state.accounts).forEach(acc=>{
+    const y=acc.years[year]; const m = y && y.months[month];
+    if(!m) return;
+    net += monthIncomeTotal(m);
+    acc.categories.forEach(c=> net -= catAmount(m,c.id));
+  });
+  return net;
+}
+function lastNRealMonths(n){
+  const now=new Date(); const arr=[];
+  for(let i=n-1;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    arr.push({year:String(d.getFullYear()), month:MONTHS[d.getMonth()]});
+  }
+  return arr;
+}
+function buildSparkline(values){
+  const w=340,h=56,pad=4;
+  const min=Math.min(...values), max=Math.max(...values);
+  const range=(max-min)||1;
+  const pts = values.map((v,i)=>({
+    x: pad + i*(w-2*pad)/(values.length-1),
+    y: h-pad - ((v-min)/range)*(h-2*pad)
+  }));
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for(let i=1;i<pts.length;i++){
+    const p0=pts[i-1], p1=pts[i], mx=(p0.x+p1.x)/2;
+    d += ` C${mx},${p0.y} ${mx},${p1.y} ${p1.x},${p1.y}`;
+  }
+  const areaD = d + ` L${pts[pts.length-1].x},${h} L${pts[0].x},${h} Z`;
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:56px;display:block;">
+    <defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+    <path d="${areaD}" fill="url(#sparkGrad)" stroke="none"/>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function toggleBalanceVisibility(){
+  state.uiPrefs = state.uiPrefs || {};
+  state.uiPrefs.balanceHidden = !state.uiPrefs.balanceHidden;
+  saveStateNow();
+  renderTotalBalanceCard();
+}
+document.getElementById('balanceEyeBtn').onclick = ()=>{ haptic(); toggleBalanceVisibility(); };
+document.getElementById('homeBellBtn').onclick = ()=>{ haptic(); };
+
+function renderTotalBalanceCard(){
+  const hidden = !!(state.uiPrefs && state.uiPrefs.balanceHidden);
+  const total = computeGrandTotal();
+  document.getElementById('tbcAmount').textContent = hidden ? '\u20b9\u2022\u2022,\u2022\u2022\u2022' : '\u20b9'+fmt(total);
+
+  const r = realNow();
+  const curNet = monthNetAllAccounts(r.year, r.month);
+  const prevNet = monthNetAllAccounts(r.prevYear, r.prevMonth);
+  const trendEl = document.getElementById('tbcTrend');
+  const sparkEl = document.getElementById('tbcSpark');
+  if(hidden){
+    trendEl.style.display='none';
+    sparkEl.style.display='none';
+  } else {
+    trendEl.style.display='block';
+    sparkEl.style.display='block';
+    const diff = curNet - prevNet;
+    const pct = prevNet!==0 ? Math.abs(diff/prevNet*100) : (curNet!==0 ? 100 : 0);
+    trendEl.className = 'tbc-trend '+(diff>=0?'up':'down');
+    trendEl.textContent = (diff>=0?'\u25b2 ':'\u25bc ')+'\u20b9'+fmt(Math.abs(diff))+' ('+pct.toFixed(2)+'%) vs last month';
+    const spark = lastNRealMonths(6).map(({year,month})=>monthNetAllAccounts(year,month));
+    sparkEl.innerHTML = buildSparkline(spark);
+  }
+}
+
+function renderHomeOverview(){
+  renderTotalBalanceCard();
   const grid = document.getElementById('accountsOverviewGrid'); grid.innerHTML='';
   Object.entries(state.accounts).forEach(([id,acc])=>{
     const t = THEME_BY_KEY[acc.theme] || THEMES[0];
-    const y = acc.years[currentYear] || {months:{}};
-    let income=0, out=0;
-    Object.values(y.months).forEach(m=>{
-      income += monthIncomeTotal(m);
-      acc.categories.forEach(c=> out += catAmount(m,c.id));
-    });
+    const bal = accountYearBalance(id, currentYear);
+    const sub = acc.lastTransaction ? ('Last: '+formatRelativeTime(acc.lastTransaction.ts)) : (acc.categories.length+' categories');
     const tile = document.createElement('button');
-    tile.className='overview-tile'+(id===currentAccountId?' active':'');
-    tile.style.background = t.swatchGrad;
-    tile.innerHTML = `<span class="overview-tile-name">${acc.name}</span>
-      <span class="overview-tile-bal">\u20b9${fmt(income-out)}</span>
-      <span class="overview-tile-sub">Net this year</span>`;
+    tile.className='acct-tile';
+    tile.innerHTML = `<div class="acct-tile-top">
+        <span class="acct-tile-icon" style="background:${t.swatchGrad}">${themeIconSVG(acc.theme)}</span>
+        <span class="acct-tile-names"><span class="acct-tile-name">${acc.name}</span><span class="acct-tile-sub">${sub}</span></span>
+      </div>
+      <div class="acct-tile-bottom">
+        <span class="acct-tile-balance">\u20b9${fmt(bal)}</span>
+        <span class="acct-tile-chevron">\u203a</span>
+      </div>`;
     tile.onclick = ()=>{
       haptic(); closeAccountsOverview();
       if(id!==currentAccountId) switchAccountAnimated(id);
     };
     grid.appendChild(tile);
   });
-  const addTile = document.createElement('button');
-  addTile.className='overview-tile overview-tile-add';
-  addTile.innerHTML = `<span style="font-size:26px;">+</span><span class="overview-tile-sub">Add account</span>`;
-  addTile.onclick = ()=>{ closeAccountsOverview(); openAddAccountModal(); };
-  grid.appendChild(addTile);
+}
+function openAccountsOverview(){
+  renderHomeOverview();
   document.getElementById('accountsHomeScreen').style.display = 'block';
 }
 function closeAccountsOverview(){
   document.getElementById('accountsHomeScreen').style.display = 'none';
 }
 document.getElementById('closeAccountsHome').onclick = ()=>{ haptic(); closeAccountsOverview(); };
+document.getElementById('manageAccountsLink').onclick = ()=>{ haptic(); openAccountsListModal(); };
+
+/* ---------- quick add: cash transactions ---------- */
+let qaType = 'expense';
+function populateQaAccountSelect(){
+  const sel=document.getElementById('qaAccountSelect'); sel.innerHTML='';
+  Object.entries(state.accounts).forEach(([id,a])=>{
+    const opt=document.createElement('option'); opt.value=id; opt.textContent=a.name;
+    if(id===currentAccountId) opt.selected=true;
+    sel.appendChild(opt);
+  });
+}
+function populateQaCategorySelect(){
+  const accId = document.getElementById('qaAccountSelect').value || currentAccountId;
+  const acc = state.accounts[accId];
+  const sel=document.getElementById('qaCategorySelect'); sel.innerHTML='';
+  (acc ? acc.categories : []).forEach(c=>{
+    const opt=document.createElement('option'); opt.value=c.id; opt.textContent=c.name;
+    sel.appendChild(opt);
+  });
+}
+function updateQaTypeUI(){
+  document.querySelectorAll('.qa-type-btn').forEach(b=> b.classList.toggle('active', b.dataset.type===qaType));
+  document.getElementById('qaCategoryField').style.display = qaType==='expense' ? '' : 'none';
+  document.getElementById('qaIncomeNameField').style.display = qaType==='income' ? '' : 'none';
+}
+document.querySelectorAll('.qa-type-btn').forEach(b=>{
+  b.onclick=()=>{ haptic(); qaType=b.dataset.type; updateQaTypeUI(); };
+});
+document.getElementById('qaAccountSelect').addEventListener('change', populateQaCategorySelect);
+function openQuickAddModal(){
+  qaType='expense';
+  populateQaAccountSelect();
+  populateQaCategorySelect();
+  updateQaTypeUI();
+  document.getElementById('qaAmountInput').value='';
+  document.getElementById('qaIncomeNameInput').value='';
+  const r=realNow();
+  document.getElementById('qaMonthLabel').textContent = r.month+' '+r.year;
+  openModal('quickAddModal');
+}
+document.getElementById('cashTxnRow').onclick = ()=>{ haptic(); closeAccountsOverview(); openQuickAddModal(); };
+document.getElementById('closeQuickAdd').onclick=()=>closeModal('quickAddModal');
+document.getElementById('saveQuickAdd').onclick=()=>{
+  const accId = document.getElementById('qaAccountSelect').value;
+  const amt = parseFloat(document.getElementById('qaAmountInput').value);
+  if(!accId || isNaN(amt) || amt<=0) return;
+  haptic(true);
+  const r = realNow();
+  const m = monthData(accId, r.year, r.month);
+  const acc = state.accounts[accId];
+  if(qaType==='expense'){
+    const catId = document.getElementById('qaCategorySelect').value;
+    if(!catId) return;
+    m.cats[catId] = Math.max(0, (m.cats[catId]||0)+amt);
+    const cat = acc.categories.find(c=>c.id===catId);
+    acc.lastTransaction = {catName: cat ? cat.name : 'Expense', amount:amt, sign:1, ts:Date.now()};
+  } else {
+    const name = document.getElementById('qaIncomeNameInput').value.trim() || 'Income';
+    m.incomes.push({id:uid(), name, amount:amt});
+  }
+  ensureCalendarMonths();
+  saveStateNow();
+  closeModal('quickAddModal');
+  if(accId===currentAccountId) renderStructural();
+};
+
+/* ---------- yearly transactions summary ---------- */
+function unionYears(){
+  const set=new Set();
+  Object.values(state.accounts).forEach(acc=> Object.keys(acc.years).forEach(y=>set.add(y)));
+  return [...set].sort();
+}
+let yearlySummarySelectedYear=null;
+function renderYearlySummary(){
+  const years = unionYears();
+  const tabsEl = document.getElementById('yearlySummaryYearTabs'); tabsEl.innerHTML='';
+  years.forEach(y=>{
+    const b=document.createElement('button');
+    b.className='year-pill'+(y===yearlySummarySelectedYear?' active':'');
+    b.textContent=y;
+    b.onclick=()=>{ haptic(); yearlySummarySelectedYear=y; renderYearlySummary(); };
+    tabsEl.appendChild(b);
+  });
+  let totalIncome=0, totalExpense=0;
+  const perAccount=[];
+  Object.entries(state.accounts).forEach(([id,acc])=>{
+    const y = acc.years[yearlySummarySelectedYear];
+    let inc=0, out=0;
+    if(y){
+      Object.values(y.months).forEach(m=>{
+        inc += monthIncomeTotal(m);
+        acc.categories.forEach(c=> out += catAmount(m,c.id));
+      });
+    }
+    totalIncome+=inc; totalExpense+=out;
+    perAccount.push({name:acc.name, income:inc, expense:out, net:inc-out});
+  });
+  document.getElementById('ysYear').textContent = yearlySummarySelectedYear || '\u2014';
+  document.getElementById('ysIncome').textContent = fmt(totalIncome);
+  document.getElementById('ysExpense').textContent = fmt(totalExpense);
+  document.getElementById('ysNet').textContent = fmt(totalIncome-totalExpense);
+
+  const listEl = document.getElementById('yearlySummaryAccountList'); listEl.innerHTML='';
+  perAccount.forEach(a=>{
+    const row=document.createElement('div'); row.className='month-card';
+    row.innerHTML=`<div class="month-row" style="cursor:default;">
+      <div><div class="month-name">${a.name}</div><div class="month-meta">Income ${fmt(a.income)} \u00b7 Out ${fmt(a.expense)}</div></div>
+      <div class="month-right"><span class="chip ${a.net>=0?'pos':'neg'}">${a.net>=0?'+':'\u2212'}${fmt(Math.abs(a.net))}</span></div>
+    </div>`;
+    listEl.appendChild(row);
+  });
+}
+function openYearlySummary(){
+  const years = unionYears();
+  yearlySummarySelectedYear = years.includes(currentYear) ? currentYear : (years[years.length-1] || String(new Date().getFullYear()));
+  renderYearlySummary();
+  document.getElementById('yearlySummaryScreen').style.display='block';
+}
+function closeYearlySummary(){
+  document.getElementById('yearlySummaryScreen').style.display='none';
+  openAccountsOverview();
+}
+document.getElementById('yearlyTxnRow').onclick = ()=>{ haptic(); closeAccountsOverview(); openYearlySummary(); };
+document.getElementById('closeYearlySummary').onclick = ()=>{ haptic(); closeYearlySummary(); };
 
 function switchAccountFromSwipe(newId, pillEl){
   if(newId===currentAccountId) return;
@@ -884,6 +1221,9 @@ function buildMonthCard(month){
         catSubBtn.style.display='';
       } else {
         m.cats[c.id]=Math.max(0, (m.cats[c.id]||0)+sign*num);
+        if(num>0){
+          acc.lastTransaction = {catName:c.name, amount:num, sign, ts:Date.now()};
+        }
       }
       catInput.value='';
       catTotalEl.textContent='\u20b9'+fmt(m.cats[c.id]);
@@ -1087,6 +1427,17 @@ function buildDonutChart(m, categories){
   return wrap;
 }
 
+function formatRelativeTime(ts){
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff/60000);
+  if(min < 1) return 'just now';
+  if(min < 60) return min+'m ago';
+  const hr = Math.floor(min/60);
+  if(hr < 24) return hr+'h ago';
+  const day = Math.floor(hr/24);
+  if(day < 7) return day+'d ago';
+  return new Date(ts).toLocaleDateString('en-IN', {day:'numeric', month:'short'});
+}
 function renderHero(){
   const acc=account(); const y=acc.years[currentYear]||{months:{}, visible:[]};
   let income=0, out=0, transfers=0, sourceNames=new Set();
@@ -1103,6 +1454,15 @@ function renderHero(){
   const note=document.getElementById('heroTransferNote');
   if(transfers>0){ note.style.display='block'; note.textContent='Includes \u20b9'+fmt(transfers)+' transferred in from '+[...sourceNames].join(', '); }
   else note.style.display='none';
+  const lastTxnEl=document.getElementById('heroLastTxn');
+  if(acc.lastTransaction){
+    const lt=acc.lastTransaction;
+    const verb = lt.sign<0 ? 'Refunded' : 'Spent';
+    lastTxnEl.style.display='block';
+    lastTxnEl.innerHTML = `${verb} \u20b9${fmt(lt.amount)} on <b>${lt.catName}</b> \u00b7 ${formatRelativeTime(lt.ts)}`;
+  } else {
+    lastTxnEl.style.display='none';
+  }
 }
 
 function renderTotals(){
