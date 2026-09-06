@@ -124,18 +124,14 @@
   .field-grid{padding:14px 16px 18px;display:flex;flex-direction:column;gap:12px;}
   .archive-card .month-card{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,.09);}
 
-  .donut-wrap{display:flex;align-items:center;gap:12px;padding:12px 16px 4px;}
-  .donut-empty{font-size:12.5px;color:var(--ink-soft);text-align:center;padding:14px 0;width:100%;}
-  .donut-chart{width:86px;height:86px;border-radius:50%;flex-shrink:0;position:relative;box-shadow:0 2px 7px rgba(0,0,0,.16);opacity:.94;}
-  .donut-hole{position:absolute;inset:15px;border-radius:50%;background:rgba(10,14,20,.82);display:flex;flex-direction:column;
-    align-items:center;justify-content:center;text-align:center;}
-  .donut-total{font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2;}
-  .donut-caption{font-size:8px;color:var(--ink-soft);}
-  .donut-legend{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
-  .donut-legend-item{display:flex;align-items:center;width:100%;font-size:12px;color:var(--ink-soft);}
-  .donut-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:6px;}
-  .donut-legend-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:6px;}
-  .donut-legend-val{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;flex-shrink:0;margin-left:auto;}
+  .pulse-card{margin:12px 16px 4px;padding:16px;border-radius:16px;background:var(--card-glass);border:1px solid var(--glass-border);}
+  .pulse-label{font-size:12px;color:var(--ink-soft);}
+  .pulse-amount{font-size:26px;font-weight:750;letter-spacing:-.5px;color:var(--ink);margin-top:2px;}
+  .pulse-change{font-size:13px;font-weight:650;margin-top:4px;}
+  .pulse-change.up{color:var(--debit);}
+  .pulse-change.down{color:var(--credit);}
+  .pulse-bars{display:flex;align-items:flex-end;gap:4px;height:36px;margin:14px 0 4px;}
+  .pulse-bar{flex:1;border-radius:4px 4px 2px 2px;background:var(--glass-border);min-height:6px;}
 
   .field{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .field label{font-size:14px;color:var(--ink-soft);flex:1;}
@@ -163,26 +159,26 @@
   .result-row .label{font-size:14px;font-weight:600;}
   .result-row .val{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;transition:color .2s;}
 
-  /* Category summary (Option 8 style) */
-  .cat-summary-wrap{display:flex;flex-direction:column;gap:10px;margin-top:2px;}
-  .biggest-expense-card{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;
+  /* Category cards — amount left, comparison-vs-previous-month right */
+  .cat-cards-wrap{display:flex;flex-direction:column;gap:8px;margin-top:2px;}
+  .cat-cards-hidden{display:none;flex-direction:column;gap:8px;}
+  .cat-cards-hidden.show{display:flex;}
+  .cat-card{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:14px;
     background:var(--card-glass);border:1px solid var(--glass-border);cursor:pointer;transition:transform .15s var(--spring);}
-  .biggest-expense-card:active{transform:scale(.98);}
-  .bec-icon{width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-  .bec-icon svg{width:18px;height:18px;}
-  .bec-info{display:flex;flex-direction:column;min-width:0;flex:1;gap:2px;}
-  .bec-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);}
-  .bec-name{font-size:14.5px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .bec-amt-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
-  .bec-amt{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
-  .bec-pct{font-size:10.5px;color:var(--ink-soft);}
-  .other-expenses-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:2px 0 -4px;}
-  .other-expense-row{display:flex;align-items:center;gap:10px;padding:8px 2px;cursor:pointer;}
-  .oer-icon{width:28px;height:28px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-  .oer-icon svg{width:14px;height:14px;}
-  .oer-name{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .oer-amt{font-size:13.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;flex-shrink:0;}
+  .cat-card:active{transform:scale(.98);}
+  .cat-card-icon{width:36px;height:36px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .cat-card-icon svg{width:17px;height:17px;}
+  .cat-card-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .cat-card-name{font-size:13.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cat-card-amt{font-size:16px;font-weight:750;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .cat-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+  .cat-card-badge{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .cat-card-badge.up{color:var(--debit);}
+  .cat-card-badge.down{color:var(--credit);}
+  .cat-card-badge.flat{color:var(--ink-soft);}
+  .cat-card-sub{font-size:10px;color:var(--ink-soft);}
   .view-all-link{background:none;border:none;color:var(--accent);font-weight:600;font-size:13px;font-family:inherit;padding:6px 0 0;text-align:left;}
+
   .add-expense-btn{margin-top:14px;width:100%;padding:12px;border-radius:12px;border:none;background:var(--accent);color:#1a1408;
     font-weight:700;font-size:14px;font-family:inherit;transition:transform .15s var(--spring);}
   .add-expense-btn:active{transform:scale(.97);}
@@ -1500,8 +1496,6 @@ function buildMonthCard(month){
   const body=document.createElement('div'); body.className='month-body';
   const inner=document.createElement('div'); inner.className='month-body-inner';
 
-  const donutEl = buildDonutChart(m, acc.categories);
-
   const fg=document.createElement('div'); fg.className='field-grid';
   const incomeWrap=document.createElement('div');
   incomeWrap.innerHTML = `<div class="field" style="margin-bottom:0;">
@@ -1526,47 +1520,72 @@ function buildMonthCard(month){
   }
 
   const divider1=document.createElement('div'); divider1.className='divider'; fg.appendChild(divider1);
-  const spentDiv=document.createElement('div'); spentDiv.className='field readonly';
-  spentDiv.innerHTML=`<label>Money spent<br><span style="font-size:11px;">Auto-totalled from categories below</span></label><span class="readonly-val" data-role="spentval" style="color:var(--debit);">${fmt(0)}</span>`;
-  fg.appendChild(spentDiv);
+
+  const pulseEl = buildSpendingPulse(acc, m, currentYear, month);
+  fg.appendChild(pulseEl);
 
   if(acc.categories.length){ const d2=document.createElement('div'); d2.className='divider'; fg.appendChild(d2); }
 
-  const catSummaryWrap=document.createElement('div'); catSummaryWrap.className='cat-summary-wrap';
+  const catSummaryWrap=document.createElement('div'); catSummaryWrap.className='cat-cards-wrap';
+  const CAT_VISIBLE_CAP = 4;
   function renderCatSummary(){
     catSummaryWrap.innerHTML='';
     if(!acc.categories.length){
       catSummaryWrap.innerHTML=`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">No categories yet \u2014 add one from "Manage recurring categories".</p>`;
       return;
     }
-    const rows = acc.categories.map(c=>({c, amt: catAmount(m,c.id)})).filter(r=>r.amt>0).sort((a,b)=>b.amt-a.amt);
+    const prev = prevMonthOf(currentYear, month);
+    const prevM = peekMonthData(acc, prev.year, prev.month);
+    const rows = acc.categories.map(c=>{
+      const amt = catAmount(m,c.id);
+      const dates = catTransactions(m,c.id).map(t=>t.date).filter(Boolean);
+      const recency = dates.length ? dates.sort().pop() : '';
+      return {c, amt, recency};
+    }).filter(r=>r.amt>0).sort((a,b)=> b.recency.localeCompare(a.recency) || (b.amt-a.amt));
+
     if(!rows.length){
       catSummaryWrap.innerHTML=`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0 8px;">No expenses logged yet this month.</p>`;
-    } else {
-      const totalSpent = rows.reduce((s,r)=>s+r.amt,0);
-      const biggest = rows[0], others = rows.slice(1);
-      const pct = totalSpent>0 ? (biggest.amt/totalSpent*100) : 0;
-      const bigCard=document.createElement('div'); bigCard.className='biggest-expense-card';
-      bigCard.innerHTML = `${categoryIconSpan(biggest.c.id,biggest.c.name,'bec-icon')}
-        <div class="bec-info"><span class="bec-label">Biggest Expense</span><span class="bec-name">${biggest.c.name}</span></div>
-        <div class="bec-amt-wrap"><span class="bec-amt">\u20b9${fmt(biggest.amt)}</span><span class="bec-pct">${pct.toFixed(1)}% of total</span></div>`;
-      bigCard.onclick=(e)=>{ e.stopPropagation(); haptic(); openCategoryDetail(currentAccountId,currentYear,month,biggest.c.id); };
-      catSummaryWrap.appendChild(bigCard);
-      if(others.length){
-        const lbl=document.createElement('p'); lbl.className='other-expenses-label'; lbl.textContent='Other Expenses';
-        catSummaryWrap.appendChild(lbl);
-        others.forEach(r=>{
-          const row=document.createElement('div'); row.className='other-expense-row';
-          row.innerHTML=`${categoryIconSpan(r.c.id,r.c.name,'oer-icon')}<span class="oer-name">${r.c.name}</span><span class="oer-amt">\u20b9${fmt(r.amt)}</span>`;
-          row.onclick=(e)=>{ e.stopPropagation(); haptic(); openCategoryDetail(currentAccountId,currentYear,month,r.c.id); };
-          catSummaryWrap.appendChild(row);
-        });
-      }
+      return;
     }
-    const viewAllBtn=document.createElement('button'); viewAllBtn.type='button'; viewAllBtn.className='view-all-link';
-    viewAllBtn.textContent='View all categories \u203a';
-    viewAllBtn.onclick=(e)=>{ e.stopPropagation(); haptic(); openAllCategoriesScreen(currentAccountId,currentYear,month); };
-    catSummaryWrap.appendChild(viewAllBtn);
+
+    function buildCard(r){
+      const card=document.createElement('div'); card.className='cat-card';
+      let badgeHTML;
+      if(!prevM){
+        badgeHTML = `<span class="cat-card-badge flat">New</span>`;
+      } else {
+        const diff = r.amt - catAmount(prevM, r.c.id);
+        if(diff===0) badgeHTML = `<span class="cat-card-badge flat">\u2014 same</span>`;
+        else{
+          const up = diff>0;
+          badgeHTML = `<span class="cat-card-badge ${up?'up':'down'}">${up?'\u2191':'\u2193'} \u20b9${fmt(Math.abs(diff))}</span>`;
+        }
+      }
+      card.innerHTML = `${categoryIconSpan(r.c.id,r.c.name,'cat-card-icon')}
+        <div class="cat-card-mid"><span class="cat-card-name">${r.c.name}</span><span class="cat-card-amt">\u20b9${fmt(r.amt)}</span></div>
+        <div class="cat-card-right">${badgeHTML}<span class="cat-card-sub">vs ${prev.month}</span></div>`;
+      card.onclick=(e)=>{ e.stopPropagation(); haptic(); openCategoryDetail(currentAccountId,currentYear,month,r.c.id); };
+      return card;
+    }
+
+    const visibleRows = rows.slice(0,CAT_VISIBLE_CAP);
+    const hiddenRows = rows.slice(CAT_VISIBLE_CAP);
+    visibleRows.forEach(r=> catSummaryWrap.appendChild(buildCard(r)));
+
+    if(hiddenRows.length){
+      const hiddenWrap=document.createElement('div'); hiddenWrap.className='cat-cards-hidden';
+      hiddenRows.forEach(r=> hiddenWrap.appendChild(buildCard(r)));
+      catSummaryWrap.appendChild(hiddenWrap);
+      const viewAllBtn=document.createElement('button'); viewAllBtn.type='button'; viewAllBtn.className='view-all-link';
+      const collapsedLabel = `View all categories (${hiddenRows.length} more) \u203a`;
+      viewAllBtn.textContent=collapsedLabel;
+      viewAllBtn.onclick=(e)=>{
+        e.stopPropagation(); haptic();
+        const showing = hiddenWrap.classList.toggle('show');
+        viewAllBtn.textContent = showing ? 'Show less \u2039' : collapsedLabel;
+      };
+      catSummaryWrap.appendChild(viewAllBtn);
+    }
   }
   renderCatSummary();
   fg.appendChild(catSummaryWrap);
@@ -1580,11 +1599,11 @@ function buildMonthCard(month){
   resultDiv.innerHTML=`<span class="label">Remaining balance</span><span class="val" data-role="result">${fmt(bal)}</span>`;
   fg.appendChild(resultDiv);
 
-  inner.appendChild(donutEl); inner.appendChild(fg);
+  inner.appendChild(fg);
   body.appendChild(inner);
 
   const refs={ chipEl:row.querySelector('[data-role="chip"]'), metaEl:row.querySelector('[data-role="meta"]'),
-    resultEl:fg.querySelector('[data-role="result"]'), donutEl:donutEl, spentEl:fg.querySelector('[data-role="spentval"]') };
+    resultEl:fg.querySelector('[data-role="result"]') };
 
   let incomeEditMode = false;
   function renderIncomeRows(){
@@ -1722,34 +1741,65 @@ function updateMonthCardLive(month, refs, m){
 }
 
 const DONUT_VIVID = ['#FF6B6B','#4ECDC4','#FFD93D','#A78BFA','#6BCB77','#FF8FB1','#5DADE2','#FFB84D'];
-function getDonutPalette(){
-  const t = theme();
-  return [t.accent, ...DONUT_VIVID];
+/* ---------- spending pulse (replaces donut chart) ---------- */
+function prevMonthOf(year, month){
+  const idx = MONTHS.indexOf(month);
+  if(idx===0) return {year:String(Number(year)-1), month:MONTHS[11]};
+  return {year, month:MONTHS[idx-1]};
 }
-function buildDonutChart(m, categories){
-  const wrap=document.createElement('div'); wrap.className='donut-wrap';
-  function refresh(){
-    const palette = getDonutPalette();
-    const entries = categories.map((c,i)=>({name:c.name, val:catAmount(m,c.id), color:palette[i%palette.length]})).filter(e=>e.val>0);
-    if(!entries.length){
-      wrap.innerHTML = `<p class="donut-empty">No expenses logged yet this month.</p>`;
-      return;
+function peekMonthData(acc, year, month){
+  const y = acc.years[year];
+  return y ? y.months[month] : null;
+}
+function daysInMonth(year, month){
+  const idx = MONTHS.indexOf(month);
+  return new Date(Number(year), idx+1, 0).getDate();
+}
+function weeklySpendBuckets(acc, m, year, month){
+  const totalDays = daysInMonth(year, month);
+  const numWeeks = Math.ceil(totalDays/7);
+  const buckets = new Array(numWeeks).fill(0);
+  acc.categories.forEach(c=>{
+    catTransactions(m,c.id).forEach(t=>{
+      if(!t.date) return;
+      const d = new Date(t.date+'T00:00:00');
+      if(isNaN(d.getTime())) return;
+      const day = d.getDate();
+      const wk = Math.min(numWeeks-1, Math.floor((day-1)/7));
+      buckets[wk]+=t.amount;
+    });
+  });
+  return buckets;
+}
+function buildSpendingPulse(acc, m, year, month){
+  const wrap=document.createElement('div'); wrap.className='pulse-card';
+  const totalSpend = acc.categories.reduce((s,c)=>s+catAmount(m,c.id),0);
+  const prev = prevMonthOf(year, month);
+  const prevM = peekMonthData(acc, prev.year, prev.month);
+  const prevSpend = prevM ? acc.categories.reduce((s,c)=>s+catAmount(prevM,c.id),0) : null;
+
+  let changeHTML = '';
+  if(prevSpend!==null){
+    const diff = totalSpend - prevSpend;
+    const pct = prevSpend>0 ? Math.abs(diff/prevSpend*100) : (totalSpend>0?100:0);
+    if(diff===0){
+      changeHTML = `<div class="pulse-change" style="color:var(--ink-soft);">Same as ${prev.month}</div>`;
+    } else {
+      const up = diff>0;
+      changeHTML = `<div class="pulse-change ${up?'up':'down'}">${up?'\u2191':'\u2193'} \u20b9${fmt(Math.abs(diff))} \u00b7 ${pct.toFixed(1)}% vs ${prev.month}</div>`;
     }
-    const total = entries.reduce((s,e)=>s+e.val,0);
-    let cum=0;
-    const stops = entries.map(e=>{
-      const pct=(e.val/total)*100; const start=cum; cum+=pct;
-      return `${e.color} ${start}% ${cum}%`;
-    }).join(', ');
-    const legend = entries.map(e=>`<div class="donut-legend-item"><span class="donut-dot" style="background:${e.color}"></span><span class="donut-legend-name">${e.name}</span><span class="donut-legend-val">\u20b9${fmt(e.val)}</span></div>`).join('');
-    wrap.innerHTML = `
-      <div class="donut-chart" style="background:conic-gradient(${stops});">
-        <div class="donut-hole"><span class="donut-total">\u20b9${fmt(total)}</span><span class="donut-caption">Total spent</span></div>
-      </div>
-      <div class="donut-legend">${legend}</div>`;
   }
-  refresh();
-  wrap.refresh = refresh;
+
+  const buckets = weeklySpendBuckets(acc, m, year, month);
+  const maxB = Math.max(...buckets, 1);
+  const barsHTML = buckets.map(v=>`<div class="pulse-bar" style="height:${Math.max(6, Math.round((v/maxB)*34))}px;"></div>`).join('');
+
+  wrap.innerHTML = `
+    <span class="pulse-label">Spent this month</span>
+    <div class="pulse-amount">\u20b9${fmt(totalSpend)}</div>
+    ${changeHTML}
+    <div class="pulse-bars">${barsHTML}</div>
+  `;
   return wrap;
 }
 
