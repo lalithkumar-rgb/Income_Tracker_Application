@@ -183,13 +183,6 @@
     font-weight:700;font-size:14px;font-family:inherit;transition:transform .15s var(--spring);}
   .add-expense-btn:active{transform:scale(.97);}
 
-  /* Add Expense modal category field button */
-  .ae-field-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:none;border:none;
-    padding:0;margin-bottom:12px;font-family:inherit;text-align:left;cursor:pointer;}
-  .ae-field-btn label{font-size:14px;color:var(--dark-soft);}
-  .ae-field-val{font-size:14.5px;font-weight:600;color:var(--dark-ink);display:flex;align-items:center;gap:4px;}
-  .ae-field-val .chev{color:var(--dark-soft);font-size:15px;}
-
   /* Select Category modal */
   .sc-search{width:100%;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:10px 12px;font-size:14px;
     font-family:inherit;color:var(--dark-ink);background:#fff;margin-bottom:10px;}
@@ -212,14 +205,58 @@
   .acs-row-pct{font-size:11px;color:var(--ink-soft);}
   .acs-row-amt{font-size:14.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;flex-shrink:0;}
 
-  /* Category detail (transaction list) modal */
-  .cd-list{display:flex;flex-direction:column;max-height:40vh;overflow-y:auto;gap:1px;}
-  .cd-row{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid rgba(0,0,0,.06);}
+  /* Category detail ("Category History") screen */
+  .cd-topnav, .ae-topnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .cd-nav-btn{width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.06);color:var(--dark-soft);
+    font-size:18px;line-height:1;font-family:inherit;display:flex;align-items:center;justify-content:center;}
+  .cd-nav-title{font-size:15px;font-weight:700;color:var(--dark-ink);}
+  .cd-hero{background:#f5f6f5;border-radius:16px;padding:16px;text-align:center;margin-bottom:10px;}
+  .cd-hero-label{font-size:11px;color:var(--dark-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .cd-hero-amount{font-size:32px;font-weight:750;color:var(--dark-ink);margin-top:3px;letter-spacing:-1px;}
+  .cd-hero-sub{font-size:12px;color:var(--dark-soft);margin-top:4px;}
+  .cd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;}
+  .cd-stat{background:#f5f6f5;border-radius:12px;padding:10px 8px;text-align:center;min-width:0;}
+  .cd-stat-label{font-size:9px;color:var(--dark-soft);text-transform:uppercase;letter-spacing:.05em;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cd-stat-val{font-size:13.5px;font-weight:700;color:var(--dark-ink);margin-top:4px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cd-stat-val.up{color:#C6483C;}
+  .cd-stat-val.down{color:#3D8B62;}
+  .cd-group-label{font-size:11px;color:var(--dark-soft);text-transform:uppercase;letter-spacing:.05em;margin:14px 2px 6px;}
+  .cd-list{}
+  .cd-row-wrap{position:relative;border-radius:12px;overflow:hidden;margin-bottom:6px;}
+  .cd-row-actions{position:absolute;top:0;right:0;bottom:0;display:flex;}
+  .cd-action-btn{width:62px;border:none;color:#fff;font-family:inherit;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .cd-action-edit{background:#8A98A6;}
+  .cd-action-delete{background:#D9534F;}
+  .cd-row{position:relative;display:flex;align-items:center;gap:10px;padding:10px 4px;background:#fff;touch-action:pan-y;}
   .cd-row-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
   .cd-row-note{font-size:13.5px;font-weight:600;color:var(--dark-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .cd-row-date{font-size:11px;color:var(--dark-soft);}
   .cd-row-amt{font-size:14px;font-weight:700;color:var(--dark-ink);font-variant-numeric:tabular-nums;flex-shrink:0;}
-  .cd-row-del{width:26px;height:26px;border-radius:8px;border:none;background:var(--debit-soft);color:#B23A32;font-weight:700;font-family:inherit;flex-shrink:0;font-size:14px;}
+  .cd-add-line{width:100%;margin-top:14px;border:1.5px dashed rgba(0,0,0,.18);border-radius:14px;padding:12px;text-align:center;
+    color:var(--dark-ink);font-weight:650;font-size:13.5px;font-family:inherit;background:none;}
+
+  /* Add Expense sheet */
+  .ae-amount-label{text-align:center;font-size:11.5px;font-weight:600;letter-spacing:.05em;color:var(--dark-soft);margin:14px 0 2px;}
+  .ae-amount-row{display:flex;align-items:baseline;justify-content:center;gap:4px;margin-bottom:18px;}
+  .ae-amount-currency{font-size:26px;font-weight:700;color:var(--dark-ink);}
+  .ae-amount-input{border:none;background:none;font-family:inherit;font-size:44px;font-weight:750;letter-spacing:-1px;color:var(--dark-ink);width:210px;text-align:center;padding:0;}
+  .ae-amount-input:focus{outline:none;}
+  .ae-pill-row{display:flex;gap:10px;margin-bottom:12px;}
+  .ae-pill{flex:1;border:1px solid rgba(0,0,0,.1);border-radius:14px;padding:11px 12px;background:#fff;min-width:0;}
+  .ae-pill label{display:block;font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--dark-soft);margin-bottom:3px;text-transform:uppercase;}
+  .ae-pill b{font-size:13.5px;color:var(--dark-ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
+  .ae-date-input{border:none;background:none;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--dark-ink);padding:0;width:100%;}
+  .ae-date-input:focus{outline:none;}
+  .ae-card-btn{width:100%;display:flex;align-items:center;gap:10px;border:1px solid rgba(0,0,0,.1);border-radius:16px;padding:12px 13px;background:#fff;margin-bottom:12px;font-family:inherit;text-align:left;cursor:pointer;}
+  .ae-card-icon{width:34px;height:34px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.06);}
+  .ae-card-icon svg{width:16px;height:16px;}
+  .ae-card-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .ae-card-label{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--dark-soft);text-transform:uppercase;}
+  .ae-card-val{font-size:14.5px;font-weight:600;color:var(--dark-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ae-card-btn .chev{color:var(--dark-soft);font-size:16px;flex-shrink:0;}
+  .ae-note-card{border:1px solid rgba(0,0,0,.1);border-radius:16px;padding:2px 13px;background:#fff;}
+  .ae-note-input{width:100%;border:none;background:none;font-family:inherit;font-size:13.5px;color:var(--dark-ink);padding:10px 0;}
+  .ae-note-input:focus{outline:none;}
 
 
   .totals-card{margin-top:18px;background:var(--card-glass);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);
@@ -563,15 +600,24 @@
 </div></div>
 
 <div class="modal-backdrop" id="addExpenseModal"><div class="modal"><div class="modal-handle"></div>
-  <h2 class="serif" style="margin:0 0 16px;">Add Expense</h2>
-  <button type="button" class="ae-field-btn" id="aeCategoryBtn">
-    <label>Category</label>
-    <span class="ae-field-val" id="aeCategoryVal">Select category <span class="chev">\u203a</span></span>
+  <div class="ae-topnav">
+    <button type="button" class="cd-nav-btn" id="aeCloseX">&times;</button>
+    <span class="cd-nav-title" id="aeModalTitle">New Expense</span>
+    <span class="cd-nav-btn" style="visibility:hidden;">&times;</span>
+  </div>
+  <p class="ae-amount-label">HOW MUCH DID YOU SPEND?</p>
+  <div class="ae-amount-row"><span class="ae-amount-currency">₹</span><input type="text" inputmode="decimal" id="aeAmountInput" class="ae-amount-input" placeholder="0.00"></div>
+  <div class="ae-pill-row">
+    <div class="ae-pill"><label>Account</label><b id="aeAccountVal"></b></div>
+    <div class="ae-pill"><label>Date</label><input type="date" id="aeDateInput" class="ae-date-input"></div>
+  </div>
+  <button type="button" class="ae-card-btn" id="aeCategoryBtn">
+    <span class="ae-card-icon" id="aeCategoryIcon"></span>
+    <span class="ae-card-mid"><span class="ae-card-label">Category</span><span class="ae-card-val" id="aeCategoryVal">Select category</span></span>
+    <span class="chev">›</span>
   </button>
-  <div class="field" style="margin-bottom:10px;"><label>Amount</label><input type="number" inputmode="decimal" id="aeAmountInput" placeholder="0.00" style="width:120px;"></div>
-  <div class="field" style="margin-bottom:10px;"><label>Note <span style="font-weight:400;color:var(--ink-soft);">(optional)</span></label><input type="text" id="aeNoteInput" placeholder="Add a note" style="flex:1;text-align:left;"></div>
-  <div class="field" style="margin-bottom:4px;"><label>Date</label><input type="date" id="aeDateInput" style="flex:1;"></div>
-  <div class="modal-actions" style="margin-top:22px;"><button class="btn-cancel" id="closeAddExpense">Cancel</button><button class="btn-save" id="saveAddExpense">Add Expense</button></div>
+  <div class="ae-note-card"><input type="text" id="aeNoteInput" class="ae-note-input" placeholder="Note (optional)"></div>
+  <div class="modal-actions" style="margin-top:18px;"><button class="btn-cancel" id="closeAddExpense">Cancel</button><button class="btn-save" id="saveAddExpense">Add Expense</button></div>
 </div></div>
 
 <div class="modal-backdrop" id="selectCategoryModal"><div class="modal"><div class="modal-handle"></div>
@@ -583,11 +629,19 @@
 </div></div>
 
 <div class="modal-backdrop" id="categoryDetailModal"><div class="modal"><div class="modal-handle"></div>
-  <h2 class="serif" id="cdTitle" style="margin:0 0 4px;">Category</h2>
-  <p style="font-size:12.5px;color:var(--dark-soft);margin:0 0 14px;" id="cdSubtitle"></p>
+  <div class="cd-topnav">
+    <button type="button" class="cd-nav-btn" id="cdBackBtn">‹</button>
+    <span class="cd-nav-title" id="cdTitle">Category</span>
+    <span class="cd-nav-btn" style="visibility:hidden;">‹</span>
+  </div>
+  <div class="cd-hero">
+    <span class="cd-hero-label" id="cdHeroLabel">Spending</span>
+    <div class="cd-hero-amount" id="cdHeroAmount">₹0</div>
+    <div class="cd-hero-sub" id="cdHeroSub"></div>
+  </div>
+  <div class="cd-stats" id="cdStats"></div>
   <div class="cd-list" id="cdList"></div>
-  <button type="button" class="add-cat-btn" id="cdAddExpenseBtn" style="width:100%;margin-top:12px;">+ Add Expense</button>
-  <div class="modal-actions"><button class="btn-cancel" id="closeCategoryDetail">Close</button></div>
+  <button type="button" class="cd-add-line" id="cdAddExpenseBtn">+ Add expense</button>
 </div></div>
 
 <div id="allCategoriesScreen" style="display:none;">
@@ -870,7 +924,7 @@ function addCatTransaction(accId, year, month, catId, amount, note, dateStr){
   const m = monthData(accId, year, month);
   if(!m.cats) m.cats={};
   if(!Array.isArray(m.cats[catId])) m.cats[catId]=[];
-  const tx = {id:uid(), amount, note:note||'', date:dateStr||''};
+  const tx = {id:uid(), amount, note:note||'', date:dateStr||'', ts:Date.now()};
   m.cats[catId].push(tx);
   const acc = state.accounts[accId];
   const cat = acc.categories.find(c=>c.id===catId);
@@ -878,6 +932,20 @@ function addCatTransaction(accId, year, month, catId, amount, note, dateStr){
   ensureCalendarMonths();
   saveStateNow();
   return tx;
+}
+function updateCatTransaction(accId, year, month, catId, txId, updates){
+  const m = monthData(accId, year, month);
+  if(!m.cats || !Array.isArray(m.cats[catId])) return;
+  const tx = m.cats[catId].find(t=>t.id===txId);
+  if(!tx) return;
+  if(updates.amount!==undefined) tx.amount = updates.amount;
+  if(updates.note!==undefined) tx.note = updates.note;
+  if(updates.date!==undefined) tx.date = updates.date;
+  tx.ts = Date.now();
+  const acc = state.accounts[accId];
+  const cat = acc.categories.find(c=>c.id===catId);
+  acc.lastTransaction = {catName: cat?cat.name:'Expense', amount:tx.amount, sign:1, ts:Date.now()};
+  saveStateNow();
 }
 function deleteCatTransaction(accId, year, month, catId, txId){
   const m = monthData(accId, year, month);
@@ -1231,25 +1299,59 @@ function afterExpenseChange(month){
 
 let aeCtx = {accId:null, year:null, month:null};
 let aeSelectedCatId = null;
-function openAddExpenseModal(accId, year, month, presetCatId){
+let aeEditTxId = null;
+let returnToCategoryDetailAfterSave = false;
+
+function openAddExpenseModal(accId, year, month, presetCatId, editTxId, returnToDetail){
   aeCtx = {accId, year, month};
+  aeEditTxId = editTxId || null;
+  returnToCategoryDetailAfterSave = !!returnToDetail;
   const acc = state.accounts[accId];
-  aeSelectedCatId = presetCatId || (acc.categories[0] ? acc.categories[0].id : null);
+  document.getElementById('aeAccountVal').textContent = acc.name;
+  document.getElementById('aeModalTitle').textContent = aeEditTxId ? 'Edit Expense' : 'New Expense';
+  document.getElementById('saveAddExpense').textContent = aeEditTxId ? 'Save Changes' : 'Add Expense';
+
+  if(aeEditTxId){
+    aeSelectedCatId = presetCatId;
+    const m = monthData(accId, year, month);
+    const tx = catTransactions(m, presetCatId).find(t=>t.id===editTxId);
+    document.getElementById('aeAmountInput').value = tx ? tx.amount : '';
+    document.getElementById('aeNoteInput').value = tx ? tx.note : '';
+    document.getElementById('aeDateInput').value = (tx && tx.date) ? tx.date : new Date().toISOString().slice(0,10);
+  } else {
+    aeSelectedCatId = presetCatId || (acc.categories[0] ? acc.categories[0].id : null);
+    document.getElementById('aeAmountInput').value='';
+    document.getElementById('aeNoteInput').value='';
+    document.getElementById('aeDateInput').value = new Date().toISOString().slice(0,10);
+  }
   updateAeCategoryLabel();
-  document.getElementById('aeAmountInput').value='';
-  document.getElementById('aeNoteInput').value='';
-  document.getElementById('aeDateInput').value = new Date().toISOString().slice(0,10);
   openModal('addExpenseModal');
 }
 function updateAeCategoryLabel(){
   const acc = state.accounts[aeCtx.accId];
   const cat = acc.categories.find(c=>c.id===aeSelectedCatId);
-  document.getElementById('aeCategoryVal').innerHTML = (cat ? cat.name : 'Select category')+' <span class="chev">\u203a</span>';
+  document.getElementById('aeCategoryVal').textContent = cat ? cat.name : 'Select category';
+  const iconEl = document.getElementById('aeCategoryIcon');
+  if(cat){
+    const v = categoryVisual(cat.id, cat.name);
+    iconEl.style.background = v.color;
+    iconEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8">${v.path}</svg>`;
+  } else {
+    iconEl.style.background = 'rgba(0,0,0,.06)';
+    iconEl.innerHTML = '';
+  }
 }
 document.getElementById('aeCategoryBtn').onclick=()=>{
   haptic();
   openSelectCategoryModal(aeCtx.accId, (catId)=>{ aeSelectedCatId=catId; updateAeCategoryLabel(); });
 };
+document.getElementById('aeAmountInput').addEventListener('input', (e)=>{
+  let v = e.target.value.replace(/[^0-9.]/g,'');
+  const firstDot = v.indexOf('.');
+  if(firstDot!==-1){ v = v.slice(0,firstDot+1) + v.slice(firstDot+1).replace(/\./g,''); }
+  e.target.value = v;
+});
+document.getElementById('aeCloseX').onclick=()=>closeModal('addExpenseModal');
 document.getElementById('closeAddExpense').onclick=()=>closeModal('addExpenseModal');
 document.getElementById('saveAddExpense').onclick=()=>{
   const amt = parseFloat(document.getElementById('aeAmountInput').value);
@@ -1257,9 +1359,16 @@ document.getElementById('saveAddExpense').onclick=()=>{
   haptic(true);
   const note = document.getElementById('aeNoteInput').value.trim();
   const dateVal = document.getElementById('aeDateInput').value;
-  addCatTransaction(aeCtx.accId, aeCtx.year, aeCtx.month, aeSelectedCatId, amt, note, dateVal);
+  if(aeEditTxId){
+    updateCatTransaction(aeCtx.accId, aeCtx.year, aeCtx.month, aeSelectedCatId, aeEditTxId, {amount:amt, note, date:dateVal});
+  } else {
+    addCatTransaction(aeCtx.accId, aeCtx.year, aeCtx.month, aeSelectedCatId, amt, note, dateVal);
+  }
   closeModal('addExpenseModal');
   afterExpenseChange(aeCtx.month);
+  if(returnToCategoryDetailAfterSave){
+    openCategoryDetail(aeCtx.accId, aeCtx.year, aeCtx.month, aeSelectedCatId);
+  }
 };
 
 let scAccId = null, scOnPick = null;
@@ -1339,45 +1448,162 @@ function renderAllCategoriesScreen(){
 }
 document.getElementById('closeAllCategories').onclick=()=>{ haptic(); closeAllCategoriesScreenFn(); };
 
+/* ---------- Category Detail ("Category History") ---------- */
+function txnDateGroupLabel(dateStr){
+  if(!dateStr) return 'No date';
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d.getTime())) return 'No date';
+  const today = new Date();
+  if(d.toDateString()===today.toDateString()) return 'Today';
+  const yest = new Date(today); yest.setDate(yest.getDate()-1);
+  if(d.toDateString()===yest.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+}
+
 let cdCtx = {accId:null, year:null, month:null, catId:null};
+let cdOpenSwipeRow = null;
+function closeCdSwipeRow(row){
+  if(!row) return;
+  row.style.transition='transform .25s var(--spring)';
+  row.style.transform='translateX(0)';
+  row.dataset.open='0';
+  if(cdOpenSwipeRow===row) cdOpenSwipeRow=null;
+}
+function enableCdRowSwipe(row){
+  const ACTIONS_WIDTH = 124;
+  let startX=0, startY=0, tracking=false, decided=false, horizontal=false, dx=0;
+  row.addEventListener('pointerdown', e=>{
+    if(e.target.closest('button')) return;
+    if(cdOpenSwipeRow && cdOpenSwipeRow!==row) closeCdSwipeRow(cdOpenSwipeRow);
+    startX=e.clientX; startY=e.clientY; tracking=true; decided=false; horizontal=false;
+    row.style.transition='none';
+  });
+  row.addEventListener('pointermove', e=>{
+    if(!tracking) return;
+    const mdx=e.clientX-startX, mdy=e.clientY-startY;
+    if(!decided){
+      if(Math.abs(mdx)>8 || Math.abs(mdy)>8){
+        decided=true; horizontal = Math.abs(mdx) > Math.abs(mdy)*1.3;
+        if(!horizontal){ tracking=false; return; }
+      } else return;
+    }
+    if(!horizontal) return;
+    e.preventDefault();
+    const base = row.dataset.open==='1' ? -ACTIONS_WIDTH : 0;
+    dx = Math.max(-ACTIONS_WIDTH, Math.min(0, base+mdx));
+    row.style.transform=`translateX(${dx}px)`;
+  });
+  function end(){
+    if(!tracking) return; tracking=false;
+    if(!horizontal) return;
+    row.style.transition='transform .25s var(--spring)';
+    if(dx < -ACTIONS_WIDTH/2){
+      row.style.transform=`translateX(${-ACTIONS_WIDTH}px)`; row.dataset.open='1'; cdOpenSwipeRow=row; haptic();
+    } else {
+      row.style.transform='translateX(0)'; row.dataset.open='0';
+      if(cdOpenSwipeRow===row) cdOpenSwipeRow=null;
+    }
+  }
+  row.addEventListener('pointerup', end);
+  row.addEventListener('pointercancel', end);
+}
+
 function openCategoryDetail(accId, year, month, catId){
   cdCtx = {accId, year, month, catId};
   renderCategoryDetail();
   openModal('categoryDetailModal');
 }
 function renderCategoryDetail(){
+  cdOpenSwipeRow = null;
   const acc = state.accounts[cdCtx.accId];
   const cat = acc.categories.find(c=>c.id===cdCtx.catId);
   const m = monthData(cdCtx.accId, cdCtx.year, cdCtx.month);
-  const txs = catTransactions(m, cdCtx.catId).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const txs = catTransactions(m, cdCtx.catId).slice().sort((a,b)=>{
+    const dd = (b.date||'').localeCompare(a.date||'');
+    return dd!==0 ? dd : (b.ts||0)-(a.ts||0);
+  });
+  const total = catAmount(m, cdCtx.catId);
+
   document.getElementById('cdTitle').textContent = cat ? cat.name : 'Category';
-  document.getElementById('cdSubtitle').textContent = cdCtx.month+' \u00b7 Total \u20b9'+fmt(catAmount(m,cdCtx.catId));
+  document.getElementById('cdHeroLabel').textContent = cdCtx.month+' spending';
+  document.getElementById('cdHeroAmount').textContent = '\u20b9'+fmt(total);
+  const lastTs = txs.reduce((mx,t)=> (t.ts && t.ts>mx) ? t.ts : mx, 0);
+  document.getElementById('cdHeroSub').textContent = txs.length
+    ? `${txs.length} transaction${txs.length===1?'':'s'}`+(lastTs ? ' \u00b7 last updated '+formatRelativeTime(lastTs) : '')
+    : 'No transactions yet';
+
+  const prev = prevMonthOf(cdCtx.year, cdCtx.month);
+  const prevM = peekMonthData(acc, prev.year, prev.month);
+  const prevTotal = prevM ? catAmount(prevM, cdCtx.catId) : null;
+  const avg = txs.length ? total/txs.length : 0;
+  const biggest = txs.reduce((mx,t)=> t.amount>mx ? t.amount : mx, 0);
+  let changeHTML;
+  if(prevTotal===null){
+    changeHTML = `<span class="cd-stat-val">New</span>`;
+  } else {
+    const diff = total - prevTotal;
+    const pct = prevTotal>0 ? Math.abs(diff/prevTotal*100) : (total>0?100:0);
+    if(diff===0) changeHTML = `<span class="cd-stat-val">Same</span>`;
+    else{
+      const up = diff>0;
+      changeHTML = `<span class="cd-stat-val ${up?'up':'down'}">${up?'\u2191':'\u2193'} ${pct.toFixed(0)}%</span>`;
+    }
+  }
+  document.getElementById('cdStats').innerHTML = `
+    <div class="cd-stat"><span class="cd-stat-label">Average</span><span class="cd-stat-val">\u20b9${fmt(avg)}</span></div>
+    <div class="cd-stat"><span class="cd-stat-label">Biggest</span><span class="cd-stat-val">\u20b9${fmt(biggest)}</span></div>
+    <div class="cd-stat"><span class="cd-stat-label">vs last month</span>${changeHTML}</div>`;
+
   const listEl = document.getElementById('cdList'); listEl.innerHTML='';
   if(!txs.length){
     listEl.innerHTML = `<p style="font-size:13px;color:var(--dark-soft);padding:8px 2px;">No expenses logged yet.</p>`;
+  } else {
+    let lastGroup = null;
+    txs.forEach(t=>{
+      const groupLabel = txnDateGroupLabel(t.date);
+      if(groupLabel!==lastGroup){
+        const lbl=document.createElement('p'); lbl.className='cd-group-label'; lbl.textContent=groupLabel;
+        listEl.appendChild(lbl);
+        lastGroup = groupLabel;
+      }
+      const wrap=document.createElement('div'); wrap.className='cd-row-wrap';
+      const dateLabel = t.date ? new Date(t.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : 'No date';
+      wrap.innerHTML = `
+        <div class="cd-row-actions">
+          <button type="button" class="cd-action-btn cd-action-edit" data-role="edit">Edit</button>
+          <button type="button" class="cd-action-btn cd-action-delete" data-role="delete">Delete</button>
+        </div>
+        <div class="cd-row">
+          <span class="cd-row-info"><span class="cd-row-note">${t.note || (cat?cat.name:'Expense')}</span><span class="cd-row-date">${dateLabel}</span></span>
+          <span class="cd-row-amt">\u20b9${fmt(t.amount)}</span>
+        </div>`;
+      const row = wrap.querySelector('.cd-row');
+      wrap.querySelector('[data-role="edit"]').onclick=(e)=>{
+        e.stopPropagation(); haptic();
+        closeCdSwipeRow(row);
+        closeModal('categoryDetailModal');
+        openAddExpenseModal(cdCtx.accId, cdCtx.year, cdCtx.month, cdCtx.catId, t.id, true);
+      };
+      wrap.querySelector('[data-role="delete"]').onclick=(e)=>{
+        e.stopPropagation(); haptic(true);
+        if(!confirm('Delete this expense?')){ closeCdSwipeRow(row); return; }
+        deleteCatTransaction(cdCtx.accId, cdCtx.year, cdCtx.month, cdCtx.catId, t.id);
+        renderCategoryDetail();
+        afterExpenseChange(cdCtx.month);
+      };
+      row.addEventListener('click', ()=>{ if(row.dataset.open==='1') closeCdSwipeRow(row); });
+      enableCdRowSwipe(row);
+      listEl.appendChild(wrap);
+    });
   }
-  txs.forEach(t=>{
-    const row=document.createElement('div'); row.className='cd-row';
-    const dateLabel = t.date ? new Date(t.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
-    row.innerHTML = `<span class="cd-row-info"><span class="cd-row-note">${t.note || 'Expense'}</span><span class="cd-row-date">${dateLabel}</span></span>
-      <span class="cd-row-amt">\u20b9${fmt(t.amount)}</span>
-      <button type="button" class="cd-row-del" data-id="${t.id}">\u00d7</button>`;
-    row.querySelector('.cd-row-del').onclick=()=>{
-      haptic(true);
-      if(!confirm('Delete this expense?')) return;
-      deleteCatTransaction(cdCtx.accId, cdCtx.year, cdCtx.month, cdCtx.catId, t.id);
-      renderCategoryDetail();
-      afterExpenseChange(cdCtx.month);
-    };
-    listEl.appendChild(row);
-  });
 }
-document.getElementById('closeCategoryDetail').onclick=()=>closeModal('categoryDetailModal');
+document.getElementById('cdBackBtn').onclick=()=>{ haptic(); closeModal('categoryDetailModal'); };
 document.getElementById('cdAddExpenseBtn').onclick=()=>{
   haptic();
   closeModal('categoryDetailModal');
-  openAddExpenseModal(cdCtx.accId, cdCtx.year, cdCtx.month, cdCtx.catId);
+  openAddExpenseModal(cdCtx.accId, cdCtx.year, cdCtx.month, cdCtx.catId, null, true);
 };
+
 
 function switchAccountFromSwipe(newId, pillEl){
   if(newId===currentAccountId) return;
