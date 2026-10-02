@@ -451,16 +451,6 @@
   </header>
 
   <div class="years" id="yearTabs"></div>
-  <div class="settings-links">
-  <button class="settings-link" id="settingsBtn">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.8"/><path d="M10 2v2.4M10 15.6V18M18 10h-2.4M4.4 10H2M15.4 4.6l-1.7 1.7M6.3 13.7l-1.7 1.7M15.4 15.4l-1.7-1.7M6.3 6.3 4.6 4.6"/></svg>
-    Manage recurring categories
-  </button>
-  <button class="settings-link" id="incomeSettingsBtn">
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.8"/><path d="M10 2v2.4M10 15.6V18M18 10h-2.4M4.4 10H2M15.4 4.6l-1.7 1.7M6.3 13.7l-1.7 1.7M15.4 15.4l-1.7-1.7M6.3 6.3 4.6 4.6"/></svg>
-    Manage income sources
-  </button>
-  </div>
 
   <div class="month-list" id="monthList"></div>
 
@@ -2110,13 +2100,12 @@ function buildMonthCard(month){
   /* ----- income (mirrors expenses: pulse, source cards, add button) ----- */
   const incLabel=document.createElement('p'); incLabel.className='sec-label'; incLabel.textContent='Income';
   fg.appendChild(incLabel);
-  fg.appendChild(buildIncomePulse(acc, m, currentYear, month));
 
   const incSummaryWrap=document.createElement('div'); incSummaryWrap.className='cat-cards-wrap';
   renderSummaryCards(incSummaryWrap, {
     kind:'inc', list:acc.incomeSources, m, prevM, prevName:prev.month, allWord:'sources',
     getAmt:(mm,x)=>incAmount(mm,x.id), getTxs:(mm,x)=>incTransactions(mm,x.id),
-    emptyHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">No income sources yet \u2014 add one from "Manage income sources".</p>`,
+    emptyHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">No income sources yet \u2014 tap "+ Add Income" to create one.</p>`,
     noneHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0 8px;">No income logged yet this month.</p>`,
     onOpen:(x)=>openIncomeDetail(currentAccountId,currentYear,month,x.id)
   });
@@ -2148,7 +2137,7 @@ function buildMonthCard(month){
   renderSummaryCards(catSummaryWrap, {
     kind:'exp', list:acc.categories, m, prevM, prevName:prev.month, allWord:'categories',
     getAmt:(mm,c)=>catAmount(mm,c.id), getTxs:(mm,c)=>catTransactions(mm,c.id),
-    emptyHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">No categories yet \u2014 add one from "Manage recurring categories".</p>`,
+    emptyHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">No categories yet \u2014 tap "+ Add Expense" to create one.</p>`,
     noneHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0 8px;">No expenses logged yet this month.</p>`,
     onOpen:(c)=>openCategoryDetail(currentAccountId,currentYear,month,c.id)
   });
@@ -2697,11 +2686,6 @@ document.getElementById('totExpenseRow').onclick=()=>{
   el.style.display = open? 'none':'block';
   chevron.style.transform = open? '' : 'rotate(180deg)';
 };
-document.getElementById('settingsBtn').onclick=()=>{
-  categoryDraft = account().categories.map(c=>({...c}));
-  renderCategoryFields();
-  openModal('settingsModal');
-};
 document.getElementById('closeSettings').onclick=()=>closeModal('settingsModal');
 document.getElementById('addCatBtn').onclick=()=>{
   haptic();
@@ -2754,11 +2738,6 @@ function renderIncomeSourceFields(){
     makeRowDraggable(row, el);
   });
 }
-document.getElementById('incomeSettingsBtn').onclick=()=>{
-  incSrcDraft = (account().incomeSources||[]).map(x=>({...x}));
-  renderIncomeSourceFields();
-  openModal('incomeSourcesModal');
-};
 document.getElementById('closeIncomeSources').onclick=()=>closeModal('incomeSourcesModal');
 document.getElementById('addIncSrcBtn').onclick=()=>{
   haptic();
