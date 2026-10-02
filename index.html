@@ -316,7 +316,8 @@
   .acct-row-name{flex:1;min-width:0;font-size:14.5px;font-weight:600;color:var(--dark-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .acct-row-current{font-size:10px;font-weight:700;color:#3D8B62;background:var(--credit-soft);padding:3px 7px;border-radius:7px;flex-shrink:0;}
   .add-cat-btn{padding:10px;border-radius:10px;border:1.5px dashed rgba(0,0,0,.18);background:transparent;color:var(--dark-soft);font-size:13px;font-family:inherit;}
-  .add-income-btn{padding:10px;border-radius:10px;border:1.5px dashed var(--accent);background:rgba(255,255,255,.08);color:var(--accent);font-size:13px;font-weight:600;font-family:inherit;}
+  .add-income-btn{margin-top:14px;width:100%;padding:12px;border-radius:12px;border:none;background:var(--credit);color:#0f2418;font-weight:700;font-size:14px;font-family:inherit;transition:transform .15s var(--spring);}
+  .add-income-btn:active{transform:scale(.97);}
 
   .theme-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
   .theme-swatch{width:56px;height:56px;border-radius:14px;border:2px solid transparent;position:relative;overflow:hidden;transition:transform .15s var(--spring);}
@@ -400,6 +401,16 @@
   .lock-link{font-size:13px;color:var(--ink-soft);background:none;border:none;font-family:inherit;text-decoration:underline;}
 
   .privacy-links{display:flex;justify-content:center;gap:14px;margin-top:8px;}
+  /* income mirrors expenses: colours flip (up = good) */
+  .pulse-card.inc .pulse-change.up{color:var(--credit);}
+  .pulse-card.inc .pulse-change.down{color:var(--debit);}
+  .cat-card.inc .cat-card-badge.up{color:var(--credit);}
+  .cat-card.inc .cat-card-badge.down{color:var(--debit);}
+  .cd-stats.inc .cd-stat-val.up{color:#3D8B62;}
+  .cd-stats.inc .cd-stat-val.down{color:#C6483C;}
+  .pulse-card.inc .pulse-bar{background:var(--credit-soft);}
+  .sec-label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--ink-soft);margin:0 0 -4px;}
+  .settings-links{display:flex;flex-wrap:wrap;gap:0 18px;}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -440,16 +451,25 @@
   </header>
 
   <div class="years" id="yearTabs"></div>
+  <div class="settings-links">
   <button class="settings-link" id="settingsBtn">
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.8"/><path d="M10 2v2.4M10 15.6V18M18 10h-2.4M4.4 10H2M15.4 4.6l-1.7 1.7M6.3 13.7l-1.7 1.7M15.4 15.4l-1.7-1.7M6.3 6.3 4.6 4.6"/></svg>
     Manage recurring categories
   </button>
+  <button class="settings-link" id="incomeSettingsBtn">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.8"/><path d="M10 2v2.4M10 15.6V18M18 10h-2.4M4.4 10H2M15.4 4.6l-1.7 1.7M6.3 13.7l-1.7 1.7M15.4 15.4l-1.7-1.7M6.3 6.3 4.6 4.6"/></svg>
+    Manage income sources
+  </button>
+  </div>
 
   <div class="month-list" id="monthList"></div>
 
   <div class="totals-card" id="totalsCard" style="display:none;">
     <p class="totals-title">Year total — <span id="totalsYear"></span></p>
-    <div class="totals-line"><span>Income</span><b id="totIncome">0</b></div>
+    <div class="totals-line" id="totIncomeRow" style="cursor:pointer;padding:10px 0;">
+      <span>Income <span id="incChevron" style="display:inline-block;transition:transform .2s;font-size:19px;line-height:0;position:relative;top:3px;margin-left:2px;">▾</span></span><b id="totIncome">0</b>
+    </div>
+    <div id="totIncLines" style="display:none;padding-left:14px;"></div>
     <div class="totals-line" id="totTransferLine" style="display:none;"><span>Transfers in</span><b id="totTransfer">0</b></div>
     <div class="totals-line" id="totExpenseRow" style="cursor:pointer;padding:10px 0;">
       <span>Expenses <span id="expChevron" style="display:inline-block;transition:transform .2s;font-size:19px;line-height:0;position:relative;top:3px;margin-left:2px;">▾</span></span><b id="totExpense">0</b>
@@ -593,7 +613,7 @@
     <button type="button" class="qa-type-btn" data-type="income">Income</button>
   </div>
   <div class="field" id="qaCategoryField" style="margin-bottom:12px;"><label>Category</label><select id="qaCategorySelect"></select></div>
-  <div class="field" id="qaIncomeNameField" style="margin-bottom:12px;display:none;"><label>Source</label><input type="text" id="qaIncomeNameInput" placeholder="e.g. Salary" style="width:160px;text-align:left;"></div>
+  <div class="field" id="qaIncomeNameField" style="margin-bottom:12px;display:none;"><label>Source</label><select id="qaSourceSelect"></select></div>
   <div class="field" style="margin-bottom:4px;"><label>Amount</label><input type="number" inputmode="decimal" id="qaAmountInput" placeholder="0"></div>
   <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 0;">Logged to <b id="qaMonthLabel"></b></p>
   <div class="modal-actions" style="margin-top:22px;"><button class="btn-cancel" id="closeQuickAdd">Cancel</button><button class="btn-save" id="saveQuickAdd">Save</button></div>
@@ -620,8 +640,29 @@
   <div class="modal-actions" style="margin-top:18px;"><button class="btn-cancel" id="closeAddExpense">Cancel</button><button class="btn-save" id="saveAddExpense">Add Expense</button></div>
 </div></div>
 
+<div class="modal-backdrop" id="addIncomeModal"><div class="modal"><div class="modal-handle"></div>
+  <div class="ae-topnav">
+    <button type="button" class="cd-nav-btn" id="aiCloseX">&times;</button>
+    <span class="cd-nav-title" id="aiModalTitle">New Income</span>
+    <span class="cd-nav-btn" style="visibility:hidden;">&times;</span>
+  </div>
+  <p class="ae-amount-label">HOW MUCH DID YOU RECEIVE?</p>
+  <div class="ae-amount-row"><span class="ae-amount-currency">₹</span><input type="text" inputmode="decimal" id="aiAmountInput" class="ae-amount-input" placeholder="0.00"></div>
+  <div class="ae-pill-row">
+    <div class="ae-pill"><label>Account</label><b id="aiAccountVal"></b></div>
+    <div class="ae-pill"><label>Date</label><input type="date" id="aiDateInput" class="ae-date-input"></div>
+  </div>
+  <button type="button" class="ae-card-btn" id="aiSourceBtn">
+    <span class="ae-card-icon" id="aiSourceIcon"></span>
+    <span class="ae-card-mid"><span class="ae-card-label">Source</span><span class="ae-card-val" id="aiSourceVal">Select source</span></span>
+    <span class="chev">›</span>
+  </button>
+  <div class="ae-note-card"><input type="text" id="aiNoteInput" class="ae-note-input" placeholder="Note (optional)"></div>
+  <div class="modal-actions" style="margin-top:18px;"><button class="btn-cancel" id="closeAddIncome">Cancel</button><button class="btn-save" id="saveAddIncome">Add Income</button></div>
+</div></div>
+
 <div class="modal-backdrop" id="selectCategoryModal"><div class="modal"><div class="modal-handle"></div>
-  <h2 class="serif" style="margin:0 0 14px;">Select Category</h2>
+  <h2 class="serif" id="scTitle" style="margin:0 0 14px;">Select Category</h2>
   <input type="text" id="scSearchInput" placeholder="Search category" class="sc-search">
   <div class="sc-list" id="scList"></div>
   <button type="button" class="add-cat-btn" id="scAddNewBtn" style="width:100%;margin-top:10px;">+ Add New Category</button>
@@ -642,6 +683,29 @@
   <div class="cd-stats" id="cdStats"></div>
   <div class="cd-list" id="cdList"></div>
   <button type="button" class="cd-add-line" id="cdAddExpenseBtn">+ Add expense</button>
+</div></div>
+
+<div class="modal-backdrop" id="incomeDetailModal"><div class="modal"><div class="modal-handle"></div>
+  <div class="cd-topnav">
+    <button type="button" class="cd-nav-btn" id="sdBackBtn">‹</button>
+    <span class="cd-nav-title" id="sdTitle">Source</span>
+    <span class="cd-nav-btn" style="visibility:hidden;">‹</span>
+  </div>
+  <div class="cd-hero">
+    <span class="cd-hero-label" id="sdHeroLabel">Income</span>
+    <div class="cd-hero-amount" id="sdHeroAmount">₹0</div>
+    <div class="cd-hero-sub" id="sdHeroSub"></div>
+  </div>
+  <div class="cd-stats inc" id="sdStats"></div>
+  <div class="cd-list" id="sdList"></div>
+  <button type="button" class="cd-add-line" id="sdAddIncomeBtn">+ Add income</button>
+</div></div>
+
+<div class="modal-backdrop" id="incomeSourcesModal"><div class="modal"><div class="modal-handle"></div>
+  <h2 class="serif">Income sources</h2>
+  <div class="field-grid" id="incomeSourceFields"></div>
+  <button class="add-cat-btn" id="addIncSrcBtn" style="margin-top:4px;">+ Add source</button>
+  <div class="modal-actions"><button class="btn-cancel" id="closeIncomeSources">Cancel</button><button class="btn-save" id="saveIncomeSources">Save</button></div>
 </div></div>
 
 <div id="allCategoriesScreen" style="display:none;">
@@ -753,12 +817,17 @@ function freshCategories(){ return [
   {id:uid(), name:'Other recurring', linkTo:null}
 ]; }
 
+function freshIncomeSources(){ return [
+  {id:uid(), name:'Salary'},
+  {id:uid(), name:'Other income'}
+]; }
+
 function defaultState(){
   const y = new Date().getFullYear();
   const mainId=uid(), savId=uid();
   return { accounts:{
-    [mainId]: { name:'Main', theme:'nyc', years:{[y]:{months:{}, visible:[]}}, categories: freshCategories() },
-    [savId]: { name:'Savings', theme:'sakura', years:{[y]:{months:{}, visible:[]}}, categories: freshCategories() }
+    [mainId]: { name:'Main', theme:'nyc', years:{[y]:{months:{}, visible:[]}}, categories: freshCategories(), incomeSources: freshIncomeSources() },
+    [savId]: { name:'Savings', theme:'sakura', years:{[y]:{months:{}, visible:[]}}, categories: freshCategories(), incomeSources: freshIncomeSources() }
   }, currentAccountId: mainId };
 }
 
@@ -823,7 +892,7 @@ function saveStateDebounced(){ clearTimeout(saveTimer); saveTimer=setTimeout(sav
 function account(id){ return state.accounts[id||currentAccountId]; }
 function theme(id){ return THEME_BY_KEY[account(id).theme] || THEMES[0]; }
 
-function freshMonth(){ return { incomes:[], cats:{} }; }
+function freshMonth(){ return { inc:{}, cats:{} }; }
 
 function monthData(accId, year, month){
   const acc = account(accId);
@@ -831,7 +900,43 @@ function monthData(accId, year, month){
   return y.months[month] || (y.months[month]=freshMonth());
 }
 
-function monthIncomeTotal(m){ return (m.incomes||[]).reduce((s,r)=>s+(r.amount||0),0); }
+/* income: m.inc[sourceId] = [ {id, amount, note, date, ts} ]  (mirrors m.cats) */
+function incAmount(m,srcId){
+  const v = m.inc && m.inc[srcId];
+  return Array.isArray(v) ? v.reduce((s,t)=>s+(t.amount||0),0) : 0;
+}
+function incTransactions(m,srcId){
+  const v = m.inc && m.inc[srcId];
+  return Array.isArray(v) ? v : [];
+}
+function monthIncomeTotal(m){
+  let t=0;
+  Object.keys(m.inc||{}).forEach(k=>{ t += incAmount(m,k); });
+  return t;
+}
+/* one-time: old flat m.incomes [{name,amount}] -> sources + entries */
+function migrateIncomeSources(st){
+  Object.values(st.accounts||{}).forEach(acc=>{
+    if(!Array.isArray(acc.incomeSources)) acc.incomeSources=[];
+    Object.values(acc.years||{}).forEach(y=>{
+      Object.values(y.months||{}).forEach(m=>{
+        if(!m.inc) m.inc={};
+        if(Array.isArray(m.incomes)){
+          m.incomes.forEach(r=>{
+            const amt = r.amount||0; if(amt<=0) return;
+            const nm = (r.name||'Income').trim() || 'Income';
+            let src = acc.incomeSources.find(x=>x.name.toLowerCase()===nm.toLowerCase());
+            if(!src){ src={id:uid(), name:nm}; acc.incomeSources.push(src); }
+            if(!Array.isArray(m.inc[src.id])) m.inc[src.id]=[];
+            m.inc[src.id].push({id:r.id||uid(), amount:amt, note:'', date:'', ts:0});
+          });
+          delete m.incomes;
+        }
+      });
+    });
+    if(!acc.incomeSources.length) acc.incomeSources = freshIncomeSources();
+  });
+}
 function catAmount(m,catId){
   const v = m.cats && m.cats[catId];
   if(Array.isArray(v)) return v.reduce((s,t)=>s+(t.amount||0),0);
@@ -891,7 +996,9 @@ const CATEGORY_ICON_MAP = [
   {test:/fuel|gas|car|transport|commute/i, icon:'car'},
   {test:/shop|clothes|clothing/i, icon:'bag'},
   {test:/health|medical|doctor|pharmacy/i, icon:'heart'},
-  {test:/entertain|movie|game|subscription/i, icon:'play'}
+  {test:/entertain|movie|game|subscription/i, icon:'play'},
+  {test:/salary|wage|pay|stipend|income|freelance|bonus|business/i, icon:'cash'},
+  {test:/interest|dividend|invest|return/i, icon:'arrow'}
 ];
 const CATEGORY_ICON_PATHS = {
   bank:'<path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M2 20h20M12 3 3 8h18Z"/>',
@@ -904,6 +1011,7 @@ const CATEGORY_ICON_PATHS = {
   bag:'<path d="M6 8h12l1 12H5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   heart:'<path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z"/>',
   play:'<circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4Z"/>',
+  cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v.01M18 14.5v.01"/>',
   tag:'<path d="M20 12 12 20l-9-9V4h7l9 8Z"/><circle cx="7.5" cy="7.5" r="1.4"/>'
 };
 const CATEGORY_COLORS = ['#FF6B6B','#4ECDC4','#FFD93D','#A78BFA','#6BCB77','#FF8FB1','#5DADE2','#FFB84D','#F97316','#22D3EE'];
@@ -951,6 +1059,41 @@ function deleteCatTransaction(accId, year, month, catId, txId){
   const m = monthData(accId, year, month);
   if(!m.cats || !Array.isArray(m.cats[catId])) return;
   m.cats[catId] = m.cats[catId].filter(t=>t.id!==txId);
+  saveStateNow();
+}
+
+/* ---------- income transactions (per-source) ---------- */
+function addIncTransaction(accId, year, month, srcId, amount, note, dateStr){
+  const m = monthData(accId, year, month);
+  if(!m.inc) m.inc={};
+  if(!Array.isArray(m.inc[srcId])) m.inc[srcId]=[];
+  const tx = {id:uid(), amount, note:note||'', date:dateStr||'', ts:Date.now()};
+  m.inc[srcId].push(tx);
+  const acc = state.accounts[accId];
+  const src = acc.incomeSources.find(x=>x.id===srcId);
+  acc.lastTransaction = {catName: src?src.name:'Income', amount, sign:1, kind:'income', ts:Date.now()};
+  ensureCalendarMonths();
+  saveStateNow();
+  return tx;
+}
+function updateIncTransaction(accId, year, month, srcId, txId, updates){
+  const m = monthData(accId, year, month);
+  if(!m.inc || !Array.isArray(m.inc[srcId])) return;
+  const tx = m.inc[srcId].find(t=>t.id===txId);
+  if(!tx) return;
+  if(updates.amount!==undefined) tx.amount = updates.amount;
+  if(updates.note!==undefined) tx.note = updates.note;
+  if(updates.date!==undefined) tx.date = updates.date;
+  tx.ts = Date.now();
+  const acc = state.accounts[accId];
+  const src = acc.incomeSources.find(x=>x.id===srcId);
+  acc.lastTransaction = {catName: src?src.name:'Income', amount:tx.amount, sign:1, kind:'income', ts:Date.now()};
+  saveStateNow();
+}
+function deleteIncTransaction(accId, year, month, srcId, txId){
+  const m = monthData(accId, year, month);
+  if(!m.inc || !Array.isArray(m.inc[srcId])) return;
+  m.inc[srcId] = m.inc[srcId].filter(t=>t.id!==txId);
   saveStateNow();
 }
 
@@ -1184,6 +1327,11 @@ function populateQaCategorySelect(){
     const opt=document.createElement('option'); opt.value=c.id; opt.textContent=c.name;
     sel.appendChild(opt);
   });
+  const ssel=document.getElementById('qaSourceSelect'); ssel.innerHTML='';
+  ((acc && acc.incomeSources) || []).forEach(x=>{
+    const opt=document.createElement('option'); opt.value=x.id; opt.textContent=x.name;
+    ssel.appendChild(opt);
+  });
 }
 function updateQaTypeUI(){
   document.querySelectorAll('.qa-type-btn').forEach(b=> b.classList.toggle('active', b.dataset.type===qaType));
@@ -1200,7 +1348,6 @@ function openQuickAddModal(){
   populateQaCategorySelect();
   updateQaTypeUI();
   document.getElementById('qaAmountInput').value='';
-  document.getElementById('qaIncomeNameInput').value='';
   const r=realNow();
   document.getElementById('qaMonthLabel').textContent = r.month+' '+r.year;
   openModal('quickAddModal');
@@ -1211,18 +1358,18 @@ document.getElementById('saveQuickAdd').onclick=()=>{
   const accId = document.getElementById('qaAccountSelect').value;
   const amt = parseFloat(document.getElementById('qaAmountInput').value);
   if(!accId || isNaN(amt) || amt<=0) return;
-  haptic(true);
   const r = realNow();
-  const m = monthData(accId, r.year, r.month);
+  const today = new Date().toISOString().slice(0,10);
   if(qaType==='expense'){
     const catId = document.getElementById('qaCategorySelect').value;
     if(!catId) return;
-    addCatTransaction(accId, r.year, r.month, catId, amt, '', new Date().toISOString().slice(0,10));
+    haptic(true);
+    addCatTransaction(accId, r.year, r.month, catId, amt, '', today);
   } else {
-    const name = document.getElementById('qaIncomeNameInput').value.trim() || 'Income';
-    m.incomes.push({id:uid(), name, amount:amt});
-    ensureCalendarMonths();
-    saveStateNow();
+    const srcId = document.getElementById('qaSourceSelect').value;
+    if(!srcId) return;
+    haptic(true);
+    addIncTransaction(accId, r.year, r.month, srcId, amt, '', today);
   }
   closeModal('quickAddModal');
   if(accId===currentAccountId) renderStructural();
@@ -1371,23 +1518,108 @@ document.getElementById('saveAddExpense').onclick=()=>{
   }
 };
 
-let scAccId = null, scOnPick = null;
-function openSelectCategoryModal(accId, onPick){
-  scAccId = accId; scOnPick = onPick;
+/* ---------- Add Income (mirrors Add Expense) ---------- */
+const afterIncomeChange = afterExpenseChange;
+let aiCtx = {accId:null, year:null, month:null};
+let aiSelectedSrcId = null;
+let aiEditTxId = null;
+let returnToIncomeDetailAfterSave = false;
+
+function openAddIncomeModal(accId, year, month, presetSrcId, editTxId, returnToDetail){
+  aiCtx = {accId, year, month};
+  aiEditTxId = editTxId || null;
+  returnToIncomeDetailAfterSave = !!returnToDetail;
+  const acc = state.accounts[accId];
+  document.getElementById('aiAccountVal').textContent = acc.name;
+  document.getElementById('aiModalTitle').textContent = aiEditTxId ? 'Edit Income' : 'New Income';
+  document.getElementById('saveAddIncome').textContent = aiEditTxId ? 'Save Changes' : 'Add Income';
+  if(aiEditTxId){
+    aiSelectedSrcId = presetSrcId;
+    const m = monthData(accId, year, month);
+    const tx = incTransactions(m, presetSrcId).find(t=>t.id===editTxId);
+    document.getElementById('aiAmountInput').value = tx ? tx.amount : '';
+    document.getElementById('aiNoteInput').value = tx ? tx.note : '';
+    document.getElementById('aiDateInput').value = (tx && tx.date) ? tx.date : new Date().toISOString().slice(0,10);
+  } else {
+    aiSelectedSrcId = presetSrcId || (acc.incomeSources[0] ? acc.incomeSources[0].id : null);
+    document.getElementById('aiAmountInput').value='';
+    document.getElementById('aiNoteInput').value='';
+    document.getElementById('aiDateInput').value = new Date().toISOString().slice(0,10);
+  }
+  updateAiSourceLabel();
+  openModal('addIncomeModal');
+}
+function updateAiSourceLabel(){
+  const acc = state.accounts[aiCtx.accId];
+  const src = acc.incomeSources.find(x=>x.id===aiSelectedSrcId);
+  document.getElementById('aiSourceVal').textContent = src ? src.name : 'Select source';
+  const iconEl = document.getElementById('aiSourceIcon');
+  if(src){
+    const v = categoryVisual(src.id, src.name);
+    iconEl.style.background = v.color;
+    iconEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8">${v.path}</svg>`;
+  } else {
+    iconEl.style.background = 'rgba(0,0,0,.06)';
+    iconEl.innerHTML = '';
+  }
+}
+document.getElementById('aiSourceBtn').onclick=()=>{
+  haptic();
+  openSelectCategoryModal(aiCtx.accId, (id)=>{ aiSelectedSrcId=id; updateAiSourceLabel(); }, 'income', aiSelectedSrcId);
+};
+document.getElementById('aiAmountInput').addEventListener('input', (e)=>{
+  let v = e.target.value.replace(/[^0-9.]/g,'');
+  const firstDot = v.indexOf('.');
+  if(firstDot!==-1){ v = v.slice(0,firstDot+1) + v.slice(firstDot+1).replace(/\./g,''); }
+  e.target.value = v;
+});
+document.getElementById('aiCloseX').onclick=()=>closeModal('addIncomeModal');
+document.getElementById('closeAddIncome').onclick=()=>closeModal('addIncomeModal');
+document.getElementById('saveAddIncome').onclick=()=>{
+  const amt = parseFloat(document.getElementById('aiAmountInput').value);
+  if(!aiSelectedSrcId || isNaN(amt) || amt<=0) return;
+  haptic(true);
+  const note = document.getElementById('aiNoteInput').value.trim();
+  const dateVal = document.getElementById('aiDateInput').value;
+  if(aiEditTxId){
+    updateIncTransaction(aiCtx.accId, aiCtx.year, aiCtx.month, aiSelectedSrcId, aiEditTxId, {amount:amt, note, date:dateVal});
+  } else {
+    addIncTransaction(aiCtx.accId, aiCtx.year, aiCtx.month, aiSelectedSrcId, amt, note, dateVal);
+  }
+  closeModal('addIncomeModal');
+  afterIncomeChange(aiCtx.month);
+  if(returnToIncomeDetailAfterSave){
+    openIncomeDetail(aiCtx.accId, aiCtx.year, aiCtx.month, aiSelectedSrcId);
+  }
+};
+
+/* ---------- picker (shared by expense categories and income sources) ---------- */
+let scAccId = null, scOnPick = null, scKind = 'expense', scSelectedId = null;
+function scItems(){
+  const acc = state.accounts[scAccId];
+  if(scKind==='income'){ if(!acc.incomeSources) acc.incomeSources=[]; return acc.incomeSources; }
+  return acc.categories;
+}
+function openSelectCategoryModal(accId, onPick, kind, selectedId){
+  scAccId = accId; scOnPick = onPick; scKind = kind||'expense';
+  scSelectedId = selectedId!==undefined ? selectedId : aeSelectedCatId;
+  const inc = scKind==='income';
+  document.getElementById('scTitle').textContent = inc ? 'Select Source' : 'Select Category';
+  document.getElementById('scSearchInput').placeholder = inc ? 'Search source' : 'Search category';
+  document.getElementById('scAddNewBtn').textContent = inc ? '+ Add New Source' : '+ Add New Category';
   document.getElementById('scSearchInput').value='';
   renderScList('');
   openModal('selectCategoryModal');
 }
 function renderScList(filterText){
-  const acc = state.accounts[scAccId];
   const listEl = document.getElementById('scList'); listEl.innerHTML='';
-  const filtered = acc.categories.filter(c=>c.name.toLowerCase().includes((filterText||'').toLowerCase()));
+  const filtered = scItems().filter(c=>c.name.toLowerCase().includes((filterText||'').toLowerCase()));
   if(!filtered.length){
-    listEl.innerHTML = `<p style="font-size:13px;color:var(--dark-soft);padding:10px 4px;">No categories match.</p>`;
+    listEl.innerHTML = `<p style="font-size:13px;color:var(--dark-soft);padding:10px 4px;">No ${scKind==='income'?'sources':'categories'} match.</p>`;
   }
   filtered.forEach(c=>{
     const row=document.createElement('button'); row.type='button'; row.className='sc-row';
-    row.innerHTML = `${categoryIconSpan(c.id,c.name,'sc-row-icon')}<span class="sc-row-name">${c.name}</span>${c.id===aeSelectedCatId?'<span class="sc-row-check">\u2713</span>':''}`;
+    row.innerHTML = `${categoryIconSpan(c.id,c.name,'sc-row-icon')}<span class="sc-row-name">${c.name}</span>${c.id===scSelectedId?'<span class="sc-row-check">\u2713</span>':''}`;
     row.onclick=()=>{ haptic(); closeModal('selectCategoryModal'); if(scOnPick) scOnPick(c.id); };
     listEl.appendChild(row);
   });
@@ -1399,7 +1631,7 @@ document.getElementById('scAddNewBtn').onclick=()=>{
   if(document.getElementById('scNewNameInput')) return;
   const listEl = document.getElementById('scList');
   const row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;padding:8px 2px;';
-  row.innerHTML = `<input type="text" id="scNewNameInput" placeholder="Category name" style="flex:1;border:1px solid rgba(0,0,0,.12);border-radius:9px;padding:8px 10px;font-size:14px;font-family:inherit;color:var(--dark-ink);">
+  row.innerHTML = `<input type="text" id="scNewNameInput" placeholder="${scKind==='income'?'Source name':'Category name'}" style="flex:1;border:1px solid rgba(0,0,0,.12);border-radius:9px;padding:8px 10px;font-size:14px;font-family:inherit;color:var(--dark-ink);">
     <button type="button" id="scNewConfirmBtn" style="padding:8px 14px;border-radius:9px;border:none;background:var(--dark-ink);color:#fff;font-weight:700;font-size:13px;font-family:inherit;">Add</button>`;
   listEl.appendChild(row);
   const nameInput = document.getElementById('scNewNameInput');
@@ -1408,12 +1640,11 @@ document.getElementById('scAddNewBtn').onclick=()=>{
     const name = nameInput.value.trim();
     if(!name) return;
     haptic();
-    const acc = state.accounts[scAccId];
-    const newCat = {id:uid(), name, linkTo:null};
-    acc.categories.push(newCat);
+    const newItem = scKind==='income' ? {id:uid(), name} : {id:uid(), name, linkTo:null};
+    scItems().push(newItem);
     saveStateNow();
     closeModal('selectCategoryModal');
-    if(scOnPick) scOnPick(newCat.id);
+    if(scOnPick) scOnPick(newItem.id);
   };
 };
 
@@ -1605,6 +1836,104 @@ document.getElementById('cdAddExpenseBtn').onclick=()=>{
 };
 
 
+/* ---------- Income source detail (mirrors Category History) ---------- */
+let sdCtx = {accId:null, year:null, month:null, srcId:null};
+function openIncomeDetail(accId, year, month, srcId){
+  sdCtx = {accId, year, month, srcId};
+  renderIncomeDetail();
+  openModal('incomeDetailModal');
+}
+function renderIncomeDetail(){
+  cdOpenSwipeRow = null;
+  const acc = state.accounts[sdCtx.accId];
+  const src = acc.incomeSources.find(x=>x.id===sdCtx.srcId);
+  const m = monthData(sdCtx.accId, sdCtx.year, sdCtx.month);
+  const txs = incTransactions(m, sdCtx.srcId).slice().sort((a,b)=>{
+    const dd = (b.date||'').localeCompare(a.date||'');
+    return dd!==0 ? dd : (b.ts||0)-(a.ts||0);
+  });
+  const total = incAmount(m, sdCtx.srcId);
+
+  document.getElementById('sdTitle').textContent = src ? src.name : 'Source';
+  document.getElementById('sdHeroLabel').textContent = sdCtx.month+' income';
+  document.getElementById('sdHeroAmount').textContent = '\u20b9'+fmt(total);
+  const lastTs = txs.reduce((mx,t)=> (t.ts && t.ts>mx) ? t.ts : mx, 0);
+  document.getElementById('sdHeroSub').textContent = txs.length
+    ? `${txs.length} entr${txs.length===1?'y':'ies'}`+(lastTs ? ' \u00b7 last updated '+formatRelativeTime(lastTs) : '')
+    : 'No entries yet';
+
+  const prev = prevMonthOf(sdCtx.year, sdCtx.month);
+  const prevM = peekMonthData(acc, prev.year, prev.month);
+  const prevTotal = prevM ? incAmount(prevM, sdCtx.srcId) : null;
+  const avg = txs.length ? total/txs.length : 0;
+  const biggest = txs.reduce((mx,t)=> t.amount>mx ? t.amount : mx, 0);
+  let changeHTML;
+  if(prevTotal===null){
+    changeHTML = `<span class="cd-stat-val">New</span>`;
+  } else {
+    const diff = total - prevTotal;
+    const pct = prevTotal>0 ? Math.abs(diff/prevTotal*100) : (total>0?100:0);
+    if(diff===0) changeHTML = `<span class="cd-stat-val">Same</span>`;
+    else{
+      const up = diff>0;
+      changeHTML = `<span class="cd-stat-val ${up?'up':'down'}">${up?'\u2191':'\u2193'} ${pct.toFixed(0)}%</span>`;
+    }
+  }
+  document.getElementById('sdStats').innerHTML = `
+    <div class="cd-stat"><span class="cd-stat-label">Average</span><span class="cd-stat-val">\u20b9${fmt(avg)}</span></div>
+    <div class="cd-stat"><span class="cd-stat-label">Biggest</span><span class="cd-stat-val">\u20b9${fmt(biggest)}</span></div>
+    <div class="cd-stat"><span class="cd-stat-label">vs last month</span>${changeHTML}</div>`;
+
+  const listEl = document.getElementById('sdList'); listEl.innerHTML='';
+  if(!txs.length){
+    listEl.innerHTML = `<p style="font-size:13px;color:var(--dark-soft);padding:8px 2px;">No income logged yet.</p>`;
+  } else {
+    let lastGroup = null;
+    txs.forEach(t=>{
+      const groupLabel = txnDateGroupLabel(t.date);
+      if(groupLabel!==lastGroup){
+        const lbl=document.createElement('p'); lbl.className='cd-group-label'; lbl.textContent=groupLabel;
+        listEl.appendChild(lbl);
+        lastGroup = groupLabel;
+      }
+      const wrap=document.createElement('div'); wrap.className='cd-row-wrap';
+      const dateLabel = t.date ? new Date(t.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : 'No date';
+      wrap.innerHTML = `
+        <div class="cd-row-actions">
+          <button type="button" class="cd-action-btn cd-action-edit" data-role="edit">Edit</button>
+          <button type="button" class="cd-action-btn cd-action-delete" data-role="delete">Delete</button>
+        </div>
+        <div class="cd-row">
+          <span class="cd-row-info"><span class="cd-row-note">${t.note || (src?src.name:'Income')}</span><span class="cd-row-date">${dateLabel}</span></span>
+          <span class="cd-row-amt">\u20b9${fmt(t.amount)}</span>
+        </div>`;
+      const row = wrap.querySelector('.cd-row');
+      wrap.querySelector('[data-role="edit"]').onclick=(e)=>{
+        e.stopPropagation(); haptic();
+        closeCdSwipeRow(row);
+        closeModal('incomeDetailModal');
+        openAddIncomeModal(sdCtx.accId, sdCtx.year, sdCtx.month, sdCtx.srcId, t.id, true);
+      };
+      wrap.querySelector('[data-role="delete"]').onclick=(e)=>{
+        e.stopPropagation(); haptic(true);
+        if(!confirm('Delete this income entry?')){ closeCdSwipeRow(row); return; }
+        deleteIncTransaction(sdCtx.accId, sdCtx.year, sdCtx.month, sdCtx.srcId, t.id);
+        renderIncomeDetail();
+        afterIncomeChange(sdCtx.month);
+      };
+      row.addEventListener('click', ()=>{ if(row.dataset.open==='1') closeCdSwipeRow(row); });
+      enableCdRowSwipe(row);
+      listEl.appendChild(wrap);
+    });
+  }
+}
+document.getElementById('sdBackBtn').onclick=()=>{ haptic(); closeModal('incomeDetailModal'); };
+document.getElementById('sdAddIncomeBtn').onclick=()=>{
+  haptic();
+  closeModal('incomeDetailModal');
+  openAddIncomeModal(sdCtx.accId, sdCtx.year, sdCtx.month, sdCtx.srcId, null, true);
+};
+
 function switchAccountFromSwipe(newId, pillEl){
   if(newId===currentAccountId) return;
   haptic(true);
@@ -1707,11 +2036,65 @@ function ensureCalendarMonths(){
   });
 }
 
+/* shared by expense categories and income sources */
+function renderSummaryCards(wrap, o){
+  wrap.innerHTML='';
+  if(!o.list.length){ wrap.innerHTML=o.emptyHTML; return; }
+  const rows = o.list.map(c=>{
+    const amt = o.getAmt(o.m, c);
+    const dates = o.getTxs(o.m, c).map(t=>t.date).filter(Boolean);
+    const recency = dates.length ? dates.sort().pop() : '';
+    return {c, amt, recency};
+  }).filter(r=>r.amt>0).sort((a,b)=> b.recency.localeCompare(a.recency) || (b.amt-a.amt));
+  if(!rows.length){ wrap.innerHTML=o.noneHTML; return; }
+
+  function buildCard(r){
+    const card=document.createElement('div'); card.className='cat-card'+(o.kind==='inc'?' inc':'');
+    let badgeHTML;
+    if(!o.prevM){
+      badgeHTML = `<span class="cat-card-badge flat">New</span>`;
+    } else {
+      const diff = r.amt - o.getAmt(o.prevM, r.c);
+      if(diff===0) badgeHTML = `<span class="cat-card-badge flat">\u2014 same</span>`;
+      else{
+        const up = diff>0;
+        badgeHTML = `<span class="cat-card-badge ${up?'up':'down'}">${up?'\u2191':'\u2193'} \u20b9${fmt(Math.abs(diff))}</span>`;
+      }
+    }
+    card.innerHTML = `${categoryIconSpan(r.c.id,r.c.name,'cat-card-icon')}
+      <div class="cat-card-mid"><span class="cat-card-name">${r.c.name}</span><span class="cat-card-amt">\u20b9${fmt(r.amt)}</span></div>
+      <div class="cat-card-right">${badgeHTML}<span class="cat-card-sub">vs ${o.prevName}</span></div>`;
+    card.onclick=(e)=>{ e.stopPropagation(); haptic(); o.onOpen(r.c); };
+    return card;
+  }
+
+  const CAP = 4;
+  rows.slice(0,CAP).forEach(r=> wrap.appendChild(buildCard(r)));
+  const hiddenRows = rows.slice(CAP);
+  if(hiddenRows.length){
+    const hiddenWrap=document.createElement('div'); hiddenWrap.className='cat-cards-hidden';
+    hiddenRows.forEach(r=> hiddenWrap.appendChild(buildCard(r)));
+    wrap.appendChild(hiddenWrap);
+    const viewAllBtn=document.createElement('button'); viewAllBtn.type='button'; viewAllBtn.className='view-all-link';
+    const collapsedLabel = `View all ${o.allWord} (${hiddenRows.length} more) \u203a`;
+    viewAllBtn.textContent=collapsedLabel;
+    viewAllBtn.onclick=(e)=>{
+      e.stopPropagation(); haptic();
+      const showing = hiddenWrap.classList.toggle('show');
+      viewAllBtn.textContent = showing ? 'Show less \u2039' : collapsedLabel;
+    };
+    wrap.appendChild(viewAllBtn);
+  }
+}
+
 function buildMonthCard(month){
   const acc=account(); const m=monthData(currentAccountId,currentYear,month);
   const tf = transfersIntoMonth(currentAccountId, currentYear, month);
   const bal = monthOwnBalance(m, acc.categories) + tf.total;
   const autoOpen = isRealCurrent(currentYear, month);
+  const prev = prevMonthOf(currentYear, month);
+  const prevM = peekMonthData(acc, prev.year, prev.month);
+  if(!acc.incomeSources) acc.incomeSources=[];
 
   const card=document.createElement('div'); card.className='month-card'+(autoOpen?' open':''); card.dataset.month=month;
   const row=document.createElement('div'); row.className='month-row';
@@ -1723,21 +2106,27 @@ function buildMonthCard(month){
   const inner=document.createElement('div'); inner.className='month-body-inner';
 
   const fg=document.createElement('div'); fg.className='field-grid';
-  const incomeWrap=document.createElement('div');
-  incomeWrap.innerHTML = `<div class="field" style="margin-bottom:0;">
-      <label style="font-weight:600;color:var(--ink);">Income</label>
-      <button type="button" data-role="incomeEditToggle" class="icon-btn" title="Edit saved amounts">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13.5 3.5 16.5 6.5 6.5 16.5 3 17l.5-3.5Z"/></svg>
-      </button>
-    </div>
-    <p data-role="incomehint" style="font-size:12px;color:var(--ink-soft);margin:2px 0 0;"></p>`;
-  const incomeRowsEl=document.createElement('div'); incomeRowsEl.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:6px;';
-  incomeWrap.appendChild(incomeRowsEl);
-  const addIncomeBtn=document.createElement('button');
-  addIncomeBtn.className='add-income-btn'; addIncomeBtn.style.marginTop='8px'; addIncomeBtn.style.width='100%';
-  addIncomeBtn.textContent='+ Add income source';
-  incomeWrap.appendChild(addIncomeBtn);
-  fg.appendChild(incomeWrap);
+
+  /* ----- income (mirrors expenses: pulse, source cards, add button) ----- */
+  const incLabel=document.createElement('p'); incLabel.className='sec-label'; incLabel.textContent='Income';
+  fg.appendChild(incLabel);
+  fg.appendChild(buildIncomePulse(acc, m, currentYear, month));
+
+  const incSummaryWrap=document.createElement('div'); incSummaryWrap.className='cat-cards-wrap';
+  renderSummaryCards(incSummaryWrap, {
+    kind:'inc', list:acc.incomeSources, m, prevM, prevName:prev.month, allWord:'sources',
+    getAmt:(mm,x)=>incAmount(mm,x.id), getTxs:(mm,x)=>incTransactions(mm,x.id),
+    emptyHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">No income sources yet \u2014 add one from "Manage income sources".</p>`,
+    noneHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0 8px;">No income logged yet this month.</p>`,
+    onOpen:(x)=>openIncomeDetail(currentAccountId,currentYear,month,x.id)
+  });
+  fg.appendChild(incSummaryWrap);
+
+  const addIncomeBtn=document.createElement('button'); addIncomeBtn.type='button'; addIncomeBtn.className='add-income-btn';
+  addIncomeBtn.style.marginTop='2px';
+  addIncomeBtn.textContent='+ Add Income';
+  addIncomeBtn.onclick=(e)=>{ e.stopPropagation(); haptic(); openAddIncomeModal(currentAccountId,currentYear,month); };
+  fg.appendChild(addIncomeBtn);
 
   if(tf.total>0){
     const tfDiv=document.createElement('div'); tfDiv.className='field readonly';
@@ -1747,73 +2136,22 @@ function buildMonthCard(month){
 
   const divider1=document.createElement('div'); divider1.className='divider'; fg.appendChild(divider1);
 
+  /* ----- expenses ----- */
+  const expLabel=document.createElement('p'); expLabel.className='sec-label'; expLabel.textContent='Expenses';
+  fg.appendChild(expLabel);
   const pulseEl = buildSpendingPulse(acc, m, currentYear, month);
   fg.appendChild(pulseEl);
 
   if(acc.categories.length){ const d2=document.createElement('div'); d2.className='divider'; fg.appendChild(d2); }
 
   const catSummaryWrap=document.createElement('div'); catSummaryWrap.className='cat-cards-wrap';
-  const CAT_VISIBLE_CAP = 4;
-  function renderCatSummary(){
-    catSummaryWrap.innerHTML='';
-    if(!acc.categories.length){
-      catSummaryWrap.innerHTML=`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">No categories yet \u2014 add one from "Manage recurring categories".</p>`;
-      return;
-    }
-    const prev = prevMonthOf(currentYear, month);
-    const prevM = peekMonthData(acc, prev.year, prev.month);
-    const rows = acc.categories.map(c=>{
-      const amt = catAmount(m,c.id);
-      const dates = catTransactions(m,c.id).map(t=>t.date).filter(Boolean);
-      const recency = dates.length ? dates.sort().pop() : '';
-      return {c, amt, recency};
-    }).filter(r=>r.amt>0).sort((a,b)=> b.recency.localeCompare(a.recency) || (b.amt-a.amt));
-
-    if(!rows.length){
-      catSummaryWrap.innerHTML=`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0 8px;">No expenses logged yet this month.</p>`;
-      return;
-    }
-
-    function buildCard(r){
-      const card=document.createElement('div'); card.className='cat-card';
-      let badgeHTML;
-      if(!prevM){
-        badgeHTML = `<span class="cat-card-badge flat">New</span>`;
-      } else {
-        const diff = r.amt - catAmount(prevM, r.c.id);
-        if(diff===0) badgeHTML = `<span class="cat-card-badge flat">\u2014 same</span>`;
-        else{
-          const up = diff>0;
-          badgeHTML = `<span class="cat-card-badge ${up?'up':'down'}">${up?'\u2191':'\u2193'} \u20b9${fmt(Math.abs(diff))}</span>`;
-        }
-      }
-      card.innerHTML = `${categoryIconSpan(r.c.id,r.c.name,'cat-card-icon')}
-        <div class="cat-card-mid"><span class="cat-card-name">${r.c.name}</span><span class="cat-card-amt">\u20b9${fmt(r.amt)}</span></div>
-        <div class="cat-card-right">${badgeHTML}<span class="cat-card-sub">vs ${prev.month}</span></div>`;
-      card.onclick=(e)=>{ e.stopPropagation(); haptic(); openCategoryDetail(currentAccountId,currentYear,month,r.c.id); };
-      return card;
-    }
-
-    const visibleRows = rows.slice(0,CAT_VISIBLE_CAP);
-    const hiddenRows = rows.slice(CAT_VISIBLE_CAP);
-    visibleRows.forEach(r=> catSummaryWrap.appendChild(buildCard(r)));
-
-    if(hiddenRows.length){
-      const hiddenWrap=document.createElement('div'); hiddenWrap.className='cat-cards-hidden';
-      hiddenRows.forEach(r=> hiddenWrap.appendChild(buildCard(r)));
-      catSummaryWrap.appendChild(hiddenWrap);
-      const viewAllBtn=document.createElement('button'); viewAllBtn.type='button'; viewAllBtn.className='view-all-link';
-      const collapsedLabel = `View all categories (${hiddenRows.length} more) \u203a`;
-      viewAllBtn.textContent=collapsedLabel;
-      viewAllBtn.onclick=(e)=>{
-        e.stopPropagation(); haptic();
-        const showing = hiddenWrap.classList.toggle('show');
-        viewAllBtn.textContent = showing ? 'Show less \u2039' : collapsedLabel;
-      };
-      catSummaryWrap.appendChild(viewAllBtn);
-    }
-  }
-  renderCatSummary();
+  renderSummaryCards(catSummaryWrap, {
+    kind:'exp', list:acc.categories, m, prevM, prevName:prev.month, allWord:'categories',
+    getAmt:(mm,c)=>catAmount(mm,c.id), getTxs:(mm,c)=>catTransactions(mm,c.id),
+    emptyHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">No categories yet \u2014 add one from "Manage recurring categories".</p>`,
+    noneHTML:`<p style="font-size:13px;color:var(--ink-soft);margin:2px 0 8px;">No expenses logged yet this month.</p>`,
+    onOpen:(c)=>openCategoryDetail(currentAccountId,currentYear,month,c.id)
+  });
   fg.appendChild(catSummaryWrap);
 
   const addExpenseBtn=document.createElement('button'); addExpenseBtn.type='button'; addExpenseBtn.className='add-expense-btn';
@@ -1830,79 +2168,6 @@ function buildMonthCard(month){
 
   const refs={ chipEl:row.querySelector('[data-role="chip"]'), metaEl:row.querySelector('[data-role="meta"]'),
     resultEl:fg.querySelector('[data-role="result"]') };
-
-  let incomeEditMode = false;
-  function renderIncomeRows(){
-    incomeRowsEl.innerHTML='';
-    const hintEl = incomeWrap.querySelector('[data-role="incomehint"]');
-    if((m.incomes||[]).length===0){
-      hintEl.textContent = tf.total>0
-        ? `Currently just your \u20b9${fmt(tf.total)} transfer in \u2014 add a source below for anything extra.`
-        : 'No income logged yet \u2014 add a source below.';
-    } else { hintEl.textContent=''; }
-
-    if(!incomeEditMode){
-      (m.incomes||[]).forEach(inc=>{
-        const r=document.createElement('div');
-        r.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:6px 2px;';
-        r.innerHTML=`<span style="font-size:16px;font-weight:600;color:var(--ink);">${inc.name}</span>
-          <span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);">\u20b9${fmt(inc.amount)}</span>`;
-        incomeRowsEl.appendChild(r);
-      });
-      return;
-    }
-
-    (m.incomes||[]).forEach(inc=>{
-      const r=document.createElement('div'); r.style.cssText='display:flex;align-items:center;gap:6px;';
-      r.innerHTML=`
-        <input type="text" value="${inc.name}" data-role="incname" style="flex:1;min-width:0;text-align:left;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 10px;font-size:14px;font-family:inherit;background:#fff;color:var(--dark-ink);">
-        <input type="number" inputmode="decimal" value="${inc.amount||''}" data-role="incamt" style="width:96px;flex-shrink:0;text-align:right;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:8px 8px;font-size:15px;font-variant-numeric:tabular-nums;font-family:inherit;background:#fff;color:var(--dark-ink);">
-        <button data-role="incremove" style="width:30px;height:30px;flex-shrink:0;border-radius:8px;border:none;background:var(--debit-soft);color:var(--debit);font-weight:700;font-family:inherit;">\u00d7</button>`;
-      r.querySelector('[data-role="incname"]').addEventListener('input', e=>{
-        inc.name=e.target.value; saveStateDebounced();
-      });
-      r.querySelector('[data-role="incname"]').addEventListener('blur', ()=>{
-        if(!inc.name.trim()) inc.name='Income source';
-      });
-      r.querySelector('[data-role="incamt"]').addEventListener('input', e=>{
-        inc.amount=parseFloat(e.target.value)||0;
-        updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
-      });
-      r.querySelector('[data-role="incremove"]').addEventListener('click', e=>{
-        e.stopPropagation(); haptic();
-        m.incomes = m.incomes.filter(x=>x.id!==inc.id);
-        updateIncomeVisibility();
-        renderIncomeRows(); updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
-      });
-      incomeRowsEl.appendChild(r);
-    });
-  }
-  const incomeEditToggleBtn = incomeWrap.querySelector('[data-role="incomeEditToggle"]');
-  const editIconSVG = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13.5 3.5 16.5 6.5 6.5 16.5 3 17l.5-3.5Z"/></svg>';
-  function updateIncomeEditToggle(){
-    incomeEditToggleBtn.innerHTML = incomeEditMode ? 'Done' : editIconSVG;
-    incomeEditToggleBtn.style.width = incomeEditMode ? 'auto' : '30px';
-    incomeEditToggleBtn.style.padding = incomeEditMode ? '0 12px' : '0';
-  }
-  function updateIncomeVisibility(){
-    const hasIncomes = (m.incomes||[]).length>0;
-    incomeEditToggleBtn.style.display = hasIncomes ? '' : 'none';
-    addIncomeBtn.style.display = (!hasIncomes || incomeEditMode) ? '' : 'none';
-  }
-  incomeEditToggleBtn.addEventListener('click', e=>{
-    e.stopPropagation(); haptic();
-    incomeEditMode = !incomeEditMode;
-    updateIncomeEditToggle(); updateIncomeVisibility(); renderIncomeRows();
-  });
-  updateIncomeEditToggle(); updateIncomeVisibility();
-  renderIncomeRows();
-  addIncomeBtn.onclick=(e)=>{
-    e.stopPropagation(); haptic();
-    if(!m.incomes) m.incomes=[];
-    m.incomes.push({id:uid(), name:'Income source', amount:0});
-    incomeEditMode=true; updateIncomeEditToggle(); updateIncomeVisibility();
-    renderIncomeRows(); updateMonthCardLive(month, refs, m); renderHero(); renderTotals(); saveStateDebounced();
-  };
 
   updateMonthCardLive(month, refs, m);
   card.appendChild(row);
@@ -1981,52 +2246,71 @@ function daysInMonth(year, month){
   const idx = MONTHS.indexOf(month);
   return new Date(Number(year), idx+1, 0).getDate();
 }
-function weeklySpendBuckets(acc, m, year, month){
+function weeklyBucketsFromTxs(txs, year, month){
   const totalDays = daysInMonth(year, month);
   const numWeeks = Math.ceil(totalDays/7);
   const buckets = new Array(numWeeks).fill(0);
-  acc.categories.forEach(c=>{
-    catTransactions(m,c.id).forEach(t=>{
-      if(!t.date) return;
-      const d = new Date(t.date+'T00:00:00');
-      if(isNaN(d.getTime())) return;
-      const day = d.getDate();
-      const wk = Math.min(numWeeks-1, Math.floor((day-1)/7));
-      buckets[wk]+=t.amount;
-    });
+  txs.forEach(t=>{
+    if(!t.date) return;
+    const d = new Date(t.date+'T00:00:00');
+    if(isNaN(d.getTime())) return;
+    const wk = Math.min(numWeeks-1, Math.floor((d.getDate()-1)/7));
+    buckets[wk]+=t.amount;
   });
   return buckets;
 }
-function buildSpendingPulse(acc, m, year, month){
-  const wrap=document.createElement('div'); wrap.className='pulse-card';
-  const totalSpend = acc.categories.reduce((s,c)=>s+catAmount(m,c.id),0);
-  const prev = prevMonthOf(year, month);
-  const prevM = peekMonthData(acc, prev.year, prev.month);
-  const prevSpend = prevM ? acc.categories.reduce((s,c)=>s+catAmount(prevM,c.id),0) : null;
-
+function weeklySpendBuckets(acc, m, year, month){
+  const txs=[]; acc.categories.forEach(c=> txs.push(...catTransactions(m,c.id)));
+  return weeklyBucketsFromTxs(txs, year, month);
+}
+function weeklyIncomeBuckets(acc, m, year, month){
+  const txs=[]; (acc.incomeSources||[]).forEach(x=> txs.push(...incTransactions(m,x.id)));
+  return weeklyBucketsFromTxs(txs, year, month);
+}
+function buildPulse(o){
+  const wrap=document.createElement('div'); wrap.className='pulse-card'+(o.kind==='inc'?' inc':'');
   let changeHTML = '';
-  if(prevSpend!==null){
-    const diff = totalSpend - prevSpend;
-    const pct = prevSpend>0 ? Math.abs(diff/prevSpend*100) : (totalSpend>0?100:0);
+  if(o.prevTotal!==null){
+    const diff = o.total - o.prevTotal;
+    const pct = o.prevTotal>0 ? Math.abs(diff/o.prevTotal*100) : (o.total>0?100:0);
     if(diff===0){
-      changeHTML = `<div class="pulse-change" style="color:var(--ink-soft);">Same as ${prev.month}</div>`;
+      changeHTML = `<div class="pulse-change" style="color:var(--ink-soft);">Same as ${o.prevName}</div>`;
     } else {
       const up = diff>0;
-      changeHTML = `<div class="pulse-change ${up?'up':'down'}">${up?'\u2191':'\u2193'} \u20b9${fmt(Math.abs(diff))} \u00b7 ${pct.toFixed(1)}% vs ${prev.month}</div>`;
+      changeHTML = `<div class="pulse-change ${up?'up':'down'}">${up?'\u2191':'\u2193'} \u20b9${fmt(Math.abs(diff))} \u00b7 ${pct.toFixed(1)}% vs ${o.prevName}</div>`;
     }
   }
-
-  const buckets = weeklySpendBuckets(acc, m, year, month);
-  const maxB = Math.max(...buckets, 1);
-  const barsHTML = buckets.map(v=>`<div class="pulse-bar" style="height:${Math.max(6, Math.round((v/maxB)*34))}px;"></div>`).join('');
-
+  const maxB = Math.max(...o.buckets, 1);
+  const barsHTML = o.buckets.map(v=>`<div class="pulse-bar" style="height:${Math.max(6, Math.round((v/maxB)*34))}px;"></div>`).join('');
   wrap.innerHTML = `
-    <span class="pulse-label">Spent this month</span>
-    <div class="pulse-amount">\u20b9${fmt(totalSpend)}</div>
+    <span class="pulse-label">${o.label}</span>
+    <div class="pulse-amount">\u20b9${fmt(o.total)}</div>
     ${changeHTML}
     <div class="pulse-bars">${barsHTML}</div>
   `;
   return wrap;
+}
+function buildSpendingPulse(acc, m, year, month){
+  const prev = prevMonthOf(year, month);
+  const prevM = peekMonthData(acc, prev.year, prev.month);
+  return buildPulse({
+    kind:'exp', label:'Spent this month',
+    total: acc.categories.reduce((s,c)=>s+catAmount(m,c.id),0),
+    prevTotal: prevM ? acc.categories.reduce((s,c)=>s+catAmount(prevM,c.id),0) : null,
+    prevName: prev.month,
+    buckets: weeklySpendBuckets(acc, m, year, month)
+  });
+}
+function buildIncomePulse(acc, m, year, month){
+  const prev = prevMonthOf(year, month);
+  const prevM = peekMonthData(acc, prev.year, prev.month);
+  return buildPulse({
+    kind:'inc', label:'Received this month',
+    total: monthIncomeTotal(m),
+    prevTotal: prevM ? monthIncomeTotal(prevM) : null,
+    prevName: prev.month,
+    buckets: weeklyIncomeBuckets(acc, m, year, month)
+  });
 }
 
 function formatRelativeTime(ts){
@@ -2059,9 +2343,10 @@ function renderHero(){
   const lastTxnEl=document.getElementById('heroLastTxn');
   if(acc.lastTransaction){
     const lt=acc.lastTransaction;
-    const verb = lt.sign<0 ? 'Refunded' : 'Spent';
     lastTxnEl.style.display='block';
-    lastTxnEl.innerHTML = `${verb} \u20b9${fmt(lt.amount)} on <b>${lt.catName}</b> \u00b7 ${formatRelativeTime(lt.ts)}`;
+    lastTxnEl.innerHTML = lt.kind==='income'
+      ? `Received \u20b9${fmt(lt.amount)} from <b>${lt.catName}</b> \u00b7 ${formatRelativeTime(lt.ts)}`
+      : `${lt.sign<0 ? 'Refunded' : 'Spent'} \u20b9${fmt(lt.amount)} on <b>${lt.catName}</b> \u00b7 ${formatRelativeTime(lt.ts)}`;
   } else {
     lastTxnEl.style.display='none';
   }
@@ -2073,14 +2358,17 @@ function renderTotals(){
   if(!months.length){ document.getElementById('totalsCard').style.display='none'; return; }
   document.getElementById('totalsCard').style.display='block';
   document.getElementById('totalsYear').textContent=currentYear;
-  let income=0, transfers=0; const catTotals={};
+  let income=0, transfers=0; const catTotals={}, srcTotals={};
   acc.categories.forEach(c=> catTotals[c.id]=0);
+  (acc.incomeSources||[]).forEach(x=> srcTotals[x.id]=0);
   months.forEach(([mo,m])=>{
     income+=monthIncomeTotal(m);
+    (acc.incomeSources||[]).forEach(x=> srcTotals[x.id]+=incAmount(m,x.id));
     acc.categories.forEach(c=> catTotals[c.id]+=catAmount(m,c.id));
     transfers += transfersIntoMonth(currentAccountId,currentYear,mo).total;
   });
   document.getElementById('totIncome').textContent=fmt(income);
+  document.getElementById('totIncLines').innerHTML = (acc.incomeSources||[]).map(x=>`<div class="totals-line" style="font-size:13px;"><span>${x.name}</span><b>${fmt(srcTotals[x.id])}</b></div>`).join('');
   const tline=document.getElementById('totTransferLine');
   if(transfers>0){ tline.style.display='flex'; document.getElementById('totTransfer').textContent=fmt(transfers); } else tline.style.display='none';
   const catLinesEl=document.getElementById('totCatLines');
@@ -2289,7 +2577,7 @@ document.getElementById('saveAcctList').onclick=()=>{
       rebuilt[item.id] = acc;
     } else {
       const newId = uid();
-      rebuilt[newId] = { name:item.name, theme:item.theme, years:{[y]:{months:{}, visible:[]}}, categories: freshCategories() };
+      rebuilt[newId] = { name:item.name, theme:item.theme, years:{[y]:{months:{}, visible:[]}}, categories: freshCategories(), incomeSources: freshIncomeSources() };
     }
   });
   state.accounts = rebuilt;
@@ -2395,6 +2683,13 @@ function makeRowDraggable(row, container){
   }
   handle.addEventListener('pointerdown', onDown);
 }
+document.getElementById('totIncomeRow').onclick=()=>{
+  const el=document.getElementById('totIncLines');
+  const chevron=document.getElementById('incChevron');
+  const open = el.style.display!=='none';
+  el.style.display = open? 'none':'block';
+  chevron.style.transform = open? '' : 'rotate(180deg)';
+};
 document.getElementById('totExpenseRow').onclick=()=>{
   const el=document.getElementById('totCatLines');
   const chevron=document.getElementById('expChevron');
@@ -2423,6 +2718,72 @@ document.getElementById('saveSettings').onclick=()=>{
   }
   account().categories = kept;
   saveStateNow(); closeModal('settingsModal'); renderStructural();
+};
+
+/* ---------- modals: income sources ---------- */
+let incSrcDraft = [];
+function syncIncDraftFromDOM(){
+  const rows=[...document.getElementById('incomeSourceFields').children];
+  rows.forEach(row=>{
+    const item = incSrcDraft.find(x=>x.id===row.dataset.srcId);
+    const nameInp = row.querySelector('[data-role="name"]');
+    if(item && nameInp) item.name = nameInp.value.trim() || item.name;
+  });
+  const domOrder = rows.map(r=>r.dataset.srcId);
+  incSrcDraft.sort((a,b)=> domOrder.indexOf(a.id) - domOrder.indexOf(b.id));
+}
+function renderIncomeSourceFields(){
+  const el=document.getElementById('incomeSourceFields'); el.innerHTML='';
+  incSrcDraft.forEach(x=>{
+    const row=document.createElement('div'); row.className='cat-row';
+    row.innerHTML=`
+      <div class="cat-row-top">
+        <div class="cat-drag" data-role="drag">\u22ee\u22ee</div>
+        <input type="text" data-role="name">
+        <button class="cat-remove" data-role="remove">\u00d7</button>
+      </div>`;
+    row.querySelector('[data-role="name"]').value = x.name;
+    row.querySelector('[data-role="remove"]').onclick=()=>{
+      haptic();
+      syncIncDraftFromDOM();
+      incSrcDraft = incSrcDraft.filter(y=>y.id!==x.id);
+      renderIncomeSourceFields();
+    };
+    row.dataset.srcId=x.id;
+    el.appendChild(row);
+    makeRowDraggable(row, el);
+  });
+}
+document.getElementById('incomeSettingsBtn').onclick=()=>{
+  incSrcDraft = (account().incomeSources||[]).map(x=>({...x}));
+  renderIncomeSourceFields();
+  openModal('incomeSourcesModal');
+};
+document.getElementById('closeIncomeSources').onclick=()=>closeModal('incomeSourcesModal');
+document.getElementById('addIncSrcBtn').onclick=()=>{
+  haptic();
+  syncIncDraftFromDOM();
+  incSrcDraft.push({id:uid(), name:'New source'});
+  renderIncomeSourceFields();
+};
+document.getElementById('saveIncomeSources').onclick=()=>{
+  syncIncDraftFromDOM();
+  const acc = account();
+  const keepIds = new Set(incSrcDraft.map(x=>x.id));
+  const removed = (acc.incomeSources||[]).filter(x=>!keepIds.has(x.id));
+  if(removed.length){
+    let entries=0;
+    Object.values(acc.years).forEach(y=>Object.values(y.months).forEach(mm=>{
+      removed.forEach(x=>{ entries += incTransactions(mm,x.id).length; });
+    }));
+    if(entries>0 && !confirm(`Removing ${removed.length===1?'this source':'these sources'} will also delete ${entries} income entr${entries===1?'y':'ies'}. Continue?`)) return;
+    snapshotForUndo(removed.length===1 ? `Removed "${removed[0].name}"` : `Removed ${removed.length} income sources`);
+    Object.values(acc.years).forEach(y=>Object.values(y.months).forEach(mm=>{
+      removed.forEach(x=>{ if(mm.inc) delete mm.inc[x.id]; });
+    }));
+  }
+  acc.incomeSources = incSrcDraft;
+  saveStateNow(); closeModal('incomeSourcesModal'); renderStructural();
 };
 
 /* ---------- app passcode (privacy screen, not encryption) ---------- */
@@ -2496,6 +2857,7 @@ document.getElementById('undoToastBtn').onclick=()=>{
     if(!THEME_BY_KEY[a.theme]) a.theme = OLD_THEME_MAP[a.theme] || THEMES[i%THEMES.length].key;
   });
   migrateCatsToTransactions(state);
+  migrateIncomeSources(state);
   ensureCalendarMonths();
   saveStateNow();
   currentAccountId = state.currentAccountId || Object.keys(state.accounts)[0];
@@ -2574,7 +2936,7 @@ function enableSwipeToDismiss(backdropId){
   }
   handle.addEventListener('pointerdown', onDown);
 }
-['lockModal','settingsModal','addYearModal','addAccountModal','editAccountModal','accountsListModal'].forEach(enableSwipeToDismiss);
+['lockModal','settingsModal','incomeSourcesModal','addYearModal','addAccountModal','editAccountModal','accountsListModal'].forEach(enableSwipeToDismiss);
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
