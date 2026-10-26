@@ -413,30 +413,38 @@
   .settings-links{display:flex;flex-wrap:wrap;gap:0 18px;}
 
   /* ---------- Cash Wallet (light Home tab) ---------- */
-  #cashWalletScreen{position:fixed;inset:0;z-index:55;background:#fff;color:#111;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 30px);}
-  #cashWalletScreen .cam-btn{background:#F4F4F5;color:#111;}
+  #cashWalletScreen{position:fixed;inset:0;z-index:55;background:var(--paper);color:var(--ink);overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 30px);}
   .cw-top{display:flex;align-items:center;justify-content:space-between;max-width:430px;margin:4px auto 22px;}
-  .cw-title{font-size:34px;font-weight:700;letter-spacing:-.5px;margin:0;}
+  .cw-title{font-size:34px;font-weight:700;letter-spacing:-.5px;margin:0;color:var(--ink);}
   .cw{max-width:430px;margin:0 auto;}
-  .cw-lab{font-size:16px;color:#6B6B70;}
-  .cw-bal{font-size:44px;font-weight:700;letter-spacing:-1px;margin:2px 0 0;font-variant-numeric:tabular-nums;color:#111;}
-  .cw-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:24px;}
-  .cw-act{background:#F4F4F5;border:0;border-radius:16px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:14px 4px 10px;font-family:inherit;font-size:13px;font-weight:500;color:#111;box-shadow:0 1px 2px rgba(0,0,0,.04);}
-  .cw-ic{display:flex;}
-  .cw-ic svg{width:30px;height:30px;}
+  .cw-lab{font-size:16px;color:var(--ink-soft);}
+  .cw-bal{font-size:44px;font-weight:700;letter-spacing:-1px;margin:2px 0 0;font-variant-numeric:tabular-nums;color:var(--ink);}
+  .cw-big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;}
+  .cw-small{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+  .cw-act{position:relative;background:var(--card-glass);border:1px solid var(--glass-border);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border-radius:18px;font-family:inherit;color:var(--ink);text-align:left;transition:transform .15s var(--spring);}
+  .cw-act:active{transform:scale(.97);}
+  .cw-big .cw-act{height:112px;padding:0 16px 14px;display:flex;align-items:flex-end;font-size:15px;font-weight:600;}
+  .cw-big .cw-art{position:absolute;top:10px;right:12px;width:62px;height:62px;}
+  .cw-small .cw-act{height:76px;padding:0 16px;display:flex;align-items:center;gap:12px;font-size:15px;font-weight:600;}
+  .cw-small .cw-art{width:44px;height:44px;flex:none;}
+  .cw-art ellipse:first-child{opacity:.35;}
+  .cw-pill{display:inline-block;margin-left:8px;padding:4px 9px;border-radius:10px;font-size:13px;font-weight:600;vertical-align:1px;}
+  .cw-pg{background:var(--credit-soft);color:var(--credit);}.cw-pr{background:var(--debit-soft);color:var(--debit);}
   .cw-head{display:flex;align-items:center;justify-content:space-between;margin:32px 0 6px;}
-  .cw-head b{font-size:22px;font-weight:700;letter-spacing:-.3px;}
-  .cw-link{background:none;border:0;color:#2563C9;font-family:inherit;font-size:15px;min-height:44px;padding:0 2px;}
+  .cw-head b{font-size:22px;font-weight:700;letter-spacing:-.3px;color:var(--ink);}
+  .cw-link{background:none;border:0;color:var(--accent);font-family:inherit;font-size:15px;font-weight:600;min-height:44px;padding:0 2px;}
   .cw-row{display:flex;align-items:center;gap:14px;padding:12px 0;position:relative;}
-  .cw-row+.cw-row::before{content:"";position:absolute;top:0;left:70px;right:0;height:1px;background:rgba(0,0,0,.07);}
-  .cw-dot{width:56px;height:56px;border-radius:16px;background:#F4F4F5;display:flex;align-items:center;justify-content:center;flex:none;}
+  .cw-row+.cw-row::before{content:"";position:absolute;top:0;left:70px;right:0;height:1px;background:var(--rule);}
+  .cw-dot{width:56px;height:56px;border-radius:16px;background:var(--card-glass);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;flex:none;}
   .cw-dot svg{width:24px;height:24px;}
   .cw-mid{min-width:0;flex:1;}
-  .cw-d{font-size:17px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .cw-s{font-size:14px;color:#6B6B70;margin-top:2px;}
+  .cw-d{font-size:17px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cw-s{font-size:14px;color:var(--ink-soft);margin-top:2px;}
   .cw-am{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .cw-empty{padding:20px 0;font-size:14px;color:#6B6B70;}
+  .cw-empty{padding:20px 0;font-size:14px;color:var(--ink-soft);}
   .cw-g{color:#17703D;}.cw-r{color:#C23B30;}.cw-b{color:#2563C9;}.cw-n{color:#3A3A3C;}
+  #cashWalletScreen .cw-g{color:var(--credit);}#cashWalletScreen .cw-r{color:var(--debit);}#cashWalletScreen .cw-b{color:#8DB4F5;}#cashWalletScreen .cw-n{color:var(--ink-soft);}
+  #cashWalletScreen .cw-dot.cw-g{background:var(--credit-soft);}#cashWalletScreen .cw-dot.cw-r{background:var(--debit-soft);}#cashWalletScreen .cw-dot.cw-b{background:rgba(141,180,245,.18);}
   .modal.cws{background:#F2F2F7;border-radius:24px 24px 0 0;padding-top:40px;}
   .cws-nav{display:flex;align-items:center;justify-content:space-between;height:44px;margin-bottom:8px;font-size:17px;color:#1C1C1E;}
   .cws-nav button{background:none;border:0;color:#2563C9;font-size:17px;font-family:inherit;min-height:44px;padding:0;}
@@ -1449,6 +1457,12 @@ document.getElementById('saveQuickAdd').onclick=()=>{
 /* ---------- cash wallet ---------- */
 const CW_P={in:'M7 7l10 10M17 9v8H9',out:'M7 17L17 7M9 7h8v8',tr:'M6 8h12M15 5l3 3-3 3M18 16H6M9 13l-3 3 3 3',rc:'M8 12l3 3 5-6M12 3a9 9 0 100 18 9 9 0 000-18z',adj:'M5 12h14M12 5v14'};
 const cwSvg=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${CW_P[k]}"/></svg>`;
+const CW_ART={
+ in:'<svg class="cw-art" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="57" rx="19" ry="4" fill="#000" opacity=".1"/><path d="M12 36v9c0 5 9 9 20 9s20-4 20-9v-9z" fill="#2E8B57"/><ellipse cx="32" cy="36" rx="20" ry="9" fill="#6FD39B"/><ellipse cx="32" cy="36" rx="13" ry="5.5" fill="#43B073"/><path d="M32 6v17M25 17l7 7 7-7" fill="none" stroke="#2E8B57" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ out:'<svg class="cw-art" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="57" rx="20" ry="4" fill="#000" opacity=".1"/><g transform="rotate(-10 32 34)"><rect x="6" y="18" width="52" height="30" rx="6" fill="#E5604E"/><rect x="6" y="18" width="52" height="8" rx="4" fill="#F59A8C"/><circle cx="32" cy="35" r="8" fill="#FBD3CC"/><circle cx="32" cy="35" r="4" fill="#E5604E"/><circle cx="14" cy="35" r="2.2" fill="#FBD3CC"/><circle cx="50" cy="35" r="2.2" fill="#FBD3CC"/></g><path d="M42 17L55 5M46 5h9v9" fill="none" stroke="#C23B30" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ tr:'<svg class="cw-art" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="58" rx="16" ry="3.5" fill="#000" opacity=".1"/><path d="M6 30L58 8 42 54 31 38z" fill="#5B9BF8"/><path d="M31 38L58 8 22 33z" fill="#2F6FDB"/><path d="M31 38l-3 13 9-10z" fill="#1E4FA8"/></svg>',
+ rc:'<svg class="cw-art" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="59" rx="17" ry="3.5" fill="#000" opacity=".1"/><rect x="13" y="9" width="38" height="48" rx="7" fill="#F2B544"/><rect x="18" y="16" width="28" height="36" rx="4" fill="#FFF6E1"/><rect x="24" y="5" width="16" height="9" rx="4" fill="#C98A1B"/><path d="M23 29l4 4 8-9" fill="none" stroke="#C98A1B" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 43h18" stroke="#E7CF9C" stroke-width="3.2" stroke-linecap="round"/></svg>'
+};
 const cwEsc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cwToday=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 const cwNum=v=>{ const n=parseFloat(String(v).replace(/,/g,'')); return isNaN(n)?NaN:Math.round(n*100)/100; };
@@ -1503,11 +1517,13 @@ function renderCashWallet(){
   const hidden=!!(state.uiPrefs && state.uiPrefs.balanceHidden);
   const all=cwEntries(), shown=cwExpanded?all:all.slice(0,2);
   const cls={in:'cw-g',out:'cw-r',tr:'cw-b',adj:'cw-n'};
-  const act=(k,l)=>`<button type="button" class="cw-act" data-a="${k}" aria-label="${l}"><span class="cw-ic ${({in:'cw-g',out:'cw-r',tr:'cw-b',rc:'cw-n'})[k]}">${cwSvg(k)}</span>${l}</button>`;
+  const act=(k,l)=>`<button type="button" class="cw-act" data-a="${k}" aria-label="${l}">${CW_ART[k]}<span>${l}</span></button>`;
+  const t0=new Date().setHours(0,0,0,0), tdy=Math.round(all.filter(e=>e.day===t0).reduce((a,e)=>a+e.amt,0)*100)/100;
+  const pill=(!hidden && tdy!==0)?`<span class="cw-pill ${tdy>0?'cw-pg':'cw-pr'}">${tdy>0?'+':'\u2212'}\u20b9${fmt(Math.abs(tdy))} today</span>`:'';
   const rows=shown.length ? shown.map(e=>`<div class="cw-row"><span class="cw-dot ${cls[e.kind]}">${cwSvg(e.kind)}</span><div class="cw-mid"><div class="cw-d">${cwEsc(e.title)}</div><div class="cw-s">${cwDateLabel(e.day)}${e.sub?' \u00b7 '+cwEsc(e.sub):''}</div></div><span class="cw-am ${cls[e.kind]}">${e.amt<0?'\u2212':'+'}\u20b9${fmt(Math.abs(e.amt))}</span></div>`).join('') : '<div class="cw-empty">No cash activity yet</div>';
   const canToggle=all.length>2;
-  el.innerHTML=`<div class="cw-lab">Physical cash you have</div><div class="cw-bal">${hidden?'\u20b9\u2022\u2022,\u2022\u2022\u2022':'\u20b9'+fmt(cwBalance())}</div>
-    <div class="cw-acts">${act('in','Receive')}${act('out','Spend')}${act('tr','Transfer')}${act('rc','Reconcile')}</div>
+  el.innerHTML=`<div class="cw-lab">Physical cash you have${pill}</div><div class="cw-bal">${hidden?'\u20b9\u2022\u2022,\u2022\u2022\u2022':'\u20b9'+fmt(cwBalance())}</div>
+    <div class="cw-big">${act('in','Receive')}${act('out','Spend')}</div><div class="cw-small">${act('tr','Transfer')}${act('rc','Reconcile')}</div>
     <div class="cw-head"><b>${cwExpanded?'History':'Activity'}</b>${canToggle?`<button type="button" class="cw-link" id="cwToggle">${cwExpanded?'Show Less':'View All'}</button>`:''}</div>
     <div class="cw-list">${rows}</div>`;
   el.querySelectorAll('.cw-act').forEach(b=>b.onclick=()=>{ haptic(); b.dataset.a==='rc' ? openCashRecon() : openCashTxn(b.dataset.a); });
