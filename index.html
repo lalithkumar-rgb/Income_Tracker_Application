@@ -411,6 +411,53 @@
   .pulse-card.inc .pulse-bar{background:var(--credit-soft);}
   .sec-label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--ink-soft);margin:0 0 -4px;}
   .settings-links{display:flex;flex-wrap:wrap;gap:0 18px;}
+
+  /* ---------- Cash Wallet (light Home tab) ---------- */
+  #cashWalletScreen{position:fixed;inset:0;z-index:55;background:#fff;color:#111;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 30px);}
+  #cashWalletScreen .cam-btn{background:#F4F4F5;color:#111;}
+  .cw-top{display:flex;align-items:center;justify-content:space-between;max-width:430px;margin:4px auto 22px;}
+  .cw-title{font-size:34px;font-weight:700;letter-spacing:-.5px;margin:0;}
+  .cw{max-width:430px;margin:0 auto;}
+  .cw-lab{font-size:16px;color:#6B6B70;}
+  .cw-bal{font-size:44px;font-weight:700;letter-spacing:-1px;margin:2px 0 0;font-variant-numeric:tabular-nums;color:#111;}
+  .cw-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:24px;}
+  .cw-act{background:#F4F4F5;border:0;border-radius:16px;height:88px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:14px 4px 10px;font-family:inherit;font-size:13px;font-weight:500;color:#111;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .cw-ic{display:flex;}
+  .cw-ic svg{width:30px;height:30px;}
+  .cw-head{display:flex;align-items:center;justify-content:space-between;margin:32px 0 6px;}
+  .cw-head b{font-size:22px;font-weight:700;letter-spacing:-.3px;}
+  .cw-link{background:none;border:0;color:#2563C9;font-family:inherit;font-size:15px;min-height:44px;padding:0 2px;}
+  .cw-row{display:flex;align-items:center;gap:14px;padding:12px 0;position:relative;}
+  .cw-row+.cw-row::before{content:"";position:absolute;top:0;left:70px;right:0;height:1px;background:rgba(0,0,0,.07);}
+  .cw-dot{width:56px;height:56px;border-radius:16px;background:#F4F4F5;display:flex;align-items:center;justify-content:center;flex:none;}
+  .cw-dot svg{width:24px;height:24px;}
+  .cw-mid{min-width:0;flex:1;}
+  .cw-d{font-size:17px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cw-s{font-size:14px;color:#6B6B70;margin-top:2px;}
+  .cw-am{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .cw-empty{padding:20px 0;font-size:14px;color:#6B6B70;}
+  .cw-g{color:#17703D;}.cw-r{color:#C23B30;}.cw-b{color:#2563C9;}.cw-n{color:#3A3A3C;}
+  .modal.cws{background:#F2F2F7;border-radius:24px 24px 0 0;padding-top:40px;}
+  .cws-nav{display:flex;align-items:center;justify-content:space-between;height:44px;margin-bottom:8px;font-size:17px;color:#1C1C1E;}
+  .cws-nav button{background:none;border:0;color:#2563C9;font-size:17px;font-family:inherit;min-height:44px;padding:0;}
+  .cws-nav span{width:48px;}
+  .cws-seg{display:flex;background:rgba(118,118,128,.12);border-radius:9px;padding:2px;}
+  .cws-seg button{flex:1;height:32px;border:0;border-radius:7px;background:none;font-family:inherit;font-size:14px;font-weight:500;color:#1C1C1E;}
+  .cws-seg button.on{background:#fff;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12);}
+  .cws-amt{text-align:center;margin:28px 0 22px;}
+  .cws-cap{font-size:13px;color:#6B6B70;}
+  .cws-amtrow{display:flex;justify-content:center;align-items:baseline;gap:4px;font-size:52px;font-weight:700;letter-spacing:-1px;margin-top:4px;}
+  .cws-amtrow input{width:7ch;border:0;background:none;outline:0;padding:0;font:inherit;color:inherit;letter-spacing:inherit;}
+  .cws-big{font-size:52px;font-weight:700;letter-spacing:-1px;margin-top:4px;font-variant-numeric:tabular-nums;}
+  .cws-grp{background:#fff;border-radius:14px;}
+  .cws-fr{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;padding:0 16px;font-size:16px;color:#1C1C1E;position:relative;}
+  .cws-fr+.cws-fr::before{content:"";position:absolute;top:0;left:16px;right:0;height:1px;background:rgba(0,0,0,.08);}
+  .cws-fr input,.cws-fr select{border:0;background:none;font-family:inherit;font-size:16px;color:#1C1C1E;outline:0;text-align:right;min-width:0;}
+  .cws-fr input.l{flex:1;text-align:left;}
+  .cws-note{font-size:13px;color:#6B6B70;line-height:1.4;padding:8px 16px 0;margin:0;}
+  .cws-flip{background:none;border:0;color:#2563C9;font-family:inherit;font-size:13px;padding:0;margin-left:6px;}
+  .cws-cta{width:100%;height:52px;margin-top:22px;border:0;border-radius:14px;background:#1C1C1E;color:#fff;font-size:17px;font-weight:600;font-family:inherit;}
+  .cws-cta:disabled{opacity:.35;}
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -577,6 +624,39 @@
     </button>
   </div>
 </div>
+
+<div id="cashWalletScreen" style="display:none;">
+  <div class="cw-top"><p class="cw-title">Cash Wallet</p>
+    <button class="cam-btn" id="closeCashWallet" title="Close" aria-label="Close"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5 5 15"/></svg></button></div>
+  <div id="cashWallet" class="cw"></div>
+</div>
+
+<div class="modal-backdrop" id="cashTxnModal"><div class="modal cws"><div class="modal-handle"></div>
+  <div class="cws-nav"><button type="button" id="cwCancel">Cancel</button><b>New Transaction</b><span></span></div>
+  <div class="cws-seg" id="cwSeg"><button type="button" data-t="in">Receive</button><button type="button" data-t="out">Spend</button><button type="button" data-t="tr">Transfer</button></div>
+  <div class="cws-amt"><span class="cws-cap" id="cwAmtLabel"></span><div class="cws-amtrow" id="cwAmtRow"><span>&#8377;</span><input id="cwAmount" type="text" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="Amount"></div></div>
+  <div class="cws-grp">
+    <div class="cws-fr" id="cwRowA"><span id="cwLabA">From</span><span id="cwSlotA"></span></div>
+    <div class="cws-fr" id="cwRowB"><span id="cwLabB">To</span><span id="cwSlotB"></span></div>
+    <div class="cws-fr"><span>Date</span><input type="date" id="cwDate"></div>
+    <div class="cws-fr"><input class="l" type="text" id="cwNote" placeholder="Description (optional)" autocomplete="off"></div>
+  </div>
+  <div style="display:none"><b id="cwCashTxt" style="font-weight:500">Cash Wallet</b><select id="cwAcctSel" aria-label="Account"></select></div>
+  <p class="cws-note"><span id="cwHint"></span><button type="button" class="cws-flip" id="cwFlip">Switch direction</button></p>
+  <button type="button" class="cws-cta" id="cwSave">Save</button>
+</div></div>
+
+<div class="modal-backdrop" id="cashReconModal"><div class="modal cws"><div class="modal-handle"></div>
+  <div class="cws-nav"><button type="button" id="rcCancel">Cancel</button><b>Reconcile Cash</b><span></span></div>
+  <div class="cws-amt"><span class="cws-cap">Difference</span><div class="cws-big" id="rcDiff">&#8377;0</div></div>
+  <div class="cws-grp">
+    <div class="cws-fr"><span>Balance in app</span><b id="rcApp" style="font-weight:500">&#8377;0</b></div>
+    <div class="cws-fr"><span>Cash counted</span><input type="text" inputmode="decimal" id="rcCount" placeholder="0" autocomplete="off" aria-label="Cash counted" style="font-weight:600"></div>
+    <div class="cws-fr"><input class="l" type="text" id="rcNote" placeholder="Reason (optional)" autocomplete="off"></div>
+  </div>
+  <p class="cws-note" id="rcHint"></p>
+  <button type="button" class="cws-cta" id="rcSave" disabled>Record Adjustment</button>
+</div></div>
 
 <div id="yearlySummaryScreen" style="display:none;">
   <div class="home-header">
@@ -1342,7 +1422,8 @@ function openQuickAddModal(){
   document.getElementById('qaMonthLabel').textContent = r.month+' '+r.year;
   openModal('quickAddModal');
 }
-document.getElementById('cashTxnRow').onclick = ()=>{ haptic(); closeAccountsOverview(); openQuickAddModal(); };
+document.getElementById('cashTxnRow').onclick = ()=>{ haptic(); closeAccountsOverview(); openCashWallet(); };
+document.getElementById('closeCashWallet').onclick = ()=>{ haptic(); closeCashWallet(); };
 document.getElementById('closeQuickAdd').onclick=()=>closeModal('quickAddModal');
 document.getElementById('saveQuickAdd').onclick=()=>{
   const accId = document.getElementById('qaAccountSelect').value;
@@ -1363,6 +1444,161 @@ document.getElementById('saveQuickAdd').onclick=()=>{
   }
   closeModal('quickAddModal');
   if(accId===currentAccountId) renderStructural();
+};
+
+/* ---------- cash wallet ---------- */
+const CW_P={in:'M7 7l10 10M17 9v8H9',out:'M7 17L17 7M9 7h8v8',tr:'M6 8h12M15 5l3 3-3 3M18 16H6M9 13l-3 3 3 3',rc:'M8 12l3 3 5-6M12 3a9 9 0 100 18 9 9 0 000-18z',adj:'M5 12h14M12 5v14'};
+const cwSvg=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${CW_P[k]}"/></svg>`;
+const cwEsc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cwToday=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+const cwNum=v=>{ const n=parseFloat(String(v).replace(/,/g,'')); return isNaN(n)?NaN:Math.round(n*100)/100; };
+let cwExpanded=false, cwType='out', cwFlipped=false, rcBal=0;
+
+function cashAcc(){ const id=state.cashAccountId; return (id && state.accounts[id]) ? id : null; }
+function ensureCashAccount(){
+  let id=cashAcc(); if(id) return id;
+  id=uid(); const y=realNow().year;
+  state.accounts[id]={ name:'Cash Wallet', theme: THEME_BY_KEY.rainforest?'rainforest':THEMES[0].key, isCash:true,
+    years:{[y]:{months:{},visible:[]}},
+    categories:[{id:'cash_spend',name:'Cash spending',linkTo:null},{id:'cash_adj_out',name:'Cash adjustment',linkTo:null}],
+    incomeSources:[{id:'cash_recv',name:'Cash received'},{id:'cash_adj_in',name:'Cash adjustment'}] };
+  state.cashAccountId=id; ensureCalendarMonths(); saveStateNow();
+  return id;
+}
+function cwBalance(){ const id=cashAcc(); return id ? accountAllTimeBalance(id) : 0; }
+function cwEntries(){
+  const id=cashAcc(); if(!id) return [];
+  const acc=state.accounts[id], out=[];
+  const stamp=tx=>({ day: tx.date ? Date.parse(tx.date+'T00:00:00') : new Date(tx.ts||0).setHours(0,0,0,0), ts:tx.ts||0 });
+  Object.values(acc.years).forEach(y=>Object.values(y.months).forEach(m=>{
+    acc.categories.forEach(c=>catTransactions(m,c.id).forEach(tx=>{
+      const t=c.linkTo && state.accounts[c.linkTo];
+      const adj=tx.kind==='adjustment';
+      out.push({...stamp(tx), kind:t?'tr':(adj?'adj':'out'), amt:-tx.amount, title:t?('Transfer to '+t.name):(tx.note||c.name), sub:t?tx.note:(adj?'Adjustment':'')});
+    }));
+    acc.incomeSources.forEach(sr=>incTransactions(m,sr.id).forEach(tx=>{
+      const adj=tx.kind==='adjustment';
+      out.push({...stamp(tx), kind:adj?'adj':'in', amt:tx.amount, title:tx.note||sr.name, sub:adj?'Adjustment':''});
+    }));
+  }));
+  Object.entries(state.accounts).forEach(([oid,o])=>{
+    if(oid===id) return;
+    o.categories.forEach(c=>{
+      if(c.linkTo!==id) return;
+      Object.values(o.years).forEach(y=>Object.values(y.months).forEach(m=>catTransactions(m,c.id).forEach(tx=>{
+        out.push({...stamp(tx), kind:'tr', amt:tx.amount, title:'Transfer from '+o.name, sub:tx.note});
+      })));
+    });
+  });
+  return out.sort((a,b)=>b.day-a.day||b.ts-a.ts);
+}
+function cwDateLabel(day){
+  const t=new Date(); t.setHours(0,0,0,0);
+  const d=Math.round((t-day)/86400000);
+  if(d===0) return 'Today'; if(d===1) return 'Yesterday';
+  return new Date(day).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+}
+function renderCashWallet(){
+  const el=document.getElementById('cashWallet'); if(!el) return;
+  const hidden=!!(state.uiPrefs && state.uiPrefs.balanceHidden);
+  const all=cwEntries(), shown=cwExpanded?all:all.slice(0,2);
+  const cls={in:'cw-g',out:'cw-r',tr:'cw-b',adj:'cw-n'};
+  const act=(k,l)=>`<button type="button" class="cw-act" data-a="${k}" aria-label="${l}"><span class="cw-ic ${({in:'cw-g',out:'cw-r',tr:'cw-b',rc:'cw-n'})[k]}">${cwSvg(k)}</span>${l}</button>`;
+  const rows=shown.length ? shown.map(e=>`<div class="cw-row"><span class="cw-dot ${cls[e.kind]}">${cwSvg(e.kind)}</span><div class="cw-mid"><div class="cw-d">${cwEsc(e.title)}</div><div class="cw-s">${cwDateLabel(e.day)}${e.sub?' \u00b7 '+cwEsc(e.sub):''}</div></div><span class="cw-am ${cls[e.kind]}">${e.amt<0?'\u2212':'+'}\u20b9${fmt(Math.abs(e.amt))}</span></div>`).join('') : '<div class="cw-empty">No cash activity yet</div>';
+  const canToggle=all.length>2;
+  el.innerHTML=`<div class="cw-lab">Physical cash you have</div><div class="cw-bal">${hidden?'\u20b9\u2022\u2022,\u2022\u2022\u2022':'\u20b9'+fmt(cwBalance())}</div>
+    <div class="cw-acts">${act('in','Receive')}${act('out','Spend')}${act('tr','Transfer')}${act('rc','Reconcile')}</div>
+    <div class="cw-head"><b>${cwExpanded?'History':'Activity'}</b>${canToggle?`<button type="button" class="cw-link" id="cwToggle">${cwExpanded?'Show Less':'View All'}</button>`:''}</div>
+    <div class="cw-list">${rows}</div>`;
+  el.querySelectorAll('.cw-act').forEach(b=>b.onclick=()=>{ haptic(); b.dataset.a==='rc' ? openCashRecon() : openCashTxn(b.dataset.a); });
+  const tg=document.getElementById('cwToggle'); if(tg) tg.onclick=()=>{ haptic(); cwExpanded=!cwExpanded; renderCashWallet(); };
+}
+function openCashWallet(){ cwExpanded=false; renderCashWallet(); cwEl('cashWalletScreen').style.display='block'; }
+function closeCashWallet(){ cwEl('cashWalletScreen').style.display='none'; openAccountsOverview(); }
+function cwRefresh(ids){
+  renderCashWallet();
+  if(ids.includes(currentAccountId)) renderStructural();
+}
+
+/* transaction sheet */
+const cwEl=id=>document.getElementById(id);
+function cwOthers(){ const cid=cashAcc(); return Object.entries(state.accounts).filter(([id])=>id!==cid); }
+function cwUpdate(){
+  const tr=cwType==='tr';
+  cwEl('cwSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===cwType));
+  cwEl('cwRowA').style.display=cwEl('cwRowB').style.display=tr?'':'none';
+  cwEl('cwFlip').style.display=tr?'':'none';
+  cwEl('cwLabA').textContent='From'; cwEl('cwLabB').textContent='To';
+  const sel=cwEl('cwAcctSel'), txt=cwEl('cwCashTxt');
+  cwEl(cwFlipped?'cwSlotA':'cwSlotB').appendChild(sel);
+  cwEl(cwFlipped?'cwSlotB':'cwSlotA').appendChild(txt);
+  cwEl('cwNote').placeholder=tr?'Note (optional)':'Description (optional)';
+  cwEl('cwAmtLabel').textContent={in:'How much did you receive?',out:'How much did you spend?',tr:'Transfer amount'}[cwType];
+  cwEl('cwAmtRow').className='cws-amtrow '+{in:'cw-g',out:'cw-r',tr:'cw-b'}[cwType];
+  cwEl('cwHint').textContent=tr?(cwOthers().length?'Updates both accounts. Not counted as income or expense.':'Add another account first to transfer cash.'):'';
+  const n=cwNum(cwEl('cwAmount').value), a=n>0?' \u20b9'+fmt(n):'';
+  cwEl('cwSave').textContent={in:'Add Cash Received',out:'Record Spend',tr:'Transfer'}[cwType]+(tr?a:'');
+  cwEl('cwSave').disabled=!(n>0) || (tr && !cwEl('cwAcctSel').value);
+}
+function openCashTxn(t){
+  cwType=t; cwFlipped=false;
+  const sel=cwEl('cwAcctSel'); sel.innerHTML='';
+  cwOthers().forEach(([id,a])=>{ const o=document.createElement('option'); o.value=id; o.textContent=a.name; sel.appendChild(o); });
+  cwEl('cwAmount').value=''; cwEl('cwNote').value=''; cwEl('cwDate').value=cwToday();
+  cwUpdate(); openModal('cashTxnModal');
+}
+cwEl('cwSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ haptic(); cwType=b.dataset.t; cwUpdate(); });
+cwEl('cwFlip').onclick=()=>{ haptic(); cwFlipped=!cwFlipped; cwUpdate(); };
+cwEl('cwAmount').addEventListener('input',cwUpdate);
+cwEl('cwAcctSel').addEventListener('change',cwUpdate);
+cwEl('cwCancel').onclick=()=>closeModal('cashTxnModal');
+cwEl('cwSave').onclick=()=>{
+  const amt=cwNum(cwEl('cwAmount').value); if(!(amt>0)) return;
+  const date=cwEl('cwDate').value||cwToday(); const d=new Date(date+'T00:00:00'); if(isNaN(d)) return;
+  const year=String(d.getFullYear()), month=MONTHS[d.getMonth()], note=cwEl('cwNote').value.trim();
+  const cid=ensureCashAccount(); let touched=[cid];
+  if(cwType==='in') addIncTransaction(cid,year,month,'cash_recv',amt,note,date);
+  else if(cwType==='out') addCatTransaction(cid,year,month,'cash_spend',amt,note,date);
+  else {
+    const oid=cwEl('cwAcctSel').value; if(!oid||oid===cid||!state.accounts[oid]) return;
+    const from=cwFlipped?oid:cid, to=cwFlipped?cid:oid, fa=state.accounts[from];
+    let cat=fa.categories.find(c=>c.linkTo===to);
+    if(!cat){ cat={id:uid(), name:'Transfer to '+state.accounts[to].name, linkTo:to}; fa.categories.push(cat); }
+    addCatTransaction(from,year,month,cat.id,amt,note,date);
+    touched=[from,to];
+  }
+  haptic(true); closeModal('cashTxnModal'); cwRefresh(touched);
+};
+
+/* reconcile sheet */
+function rcUpdate(){
+  const raw=cwEl('rcCount').value.trim(), v=cwNum(raw), has=raw!=='' && !isNaN(v);
+  const diff=has?Math.round((v-rcBal)*100)/100:0;
+  const big=cwEl('rcDiff');
+  big.textContent=(diff<0?'\u2212':diff>0?'+':'')+'\u20b9'+fmt(Math.abs(diff));
+  big.className='cws-big '+(diff<0?'cw-r':diff>0?'cw-g':'');
+  cwEl('rcHint').textContent = !has ? 'Count your physical cash and enter the total.'
+    : diff===0 ? 'Cash matches. Nothing to record.'
+    : `Records a ${diff<0?'\u2212':'+'}\u20b9${fmt(Math.abs(diff))} adjustment dated today. Existing transactions stay unchanged.`;
+  cwEl('rcSave').disabled = !has || diff===0;
+}
+function openCashRecon(){
+  rcBal=cwBalance();
+  cwEl('rcApp').textContent='\u20b9'+fmt(rcBal);
+  cwEl('rcCount').value=''; cwEl('rcNote').value='';
+  rcUpdate(); openModal('cashReconModal');
+}
+cwEl('rcCount').addEventListener('input',rcUpdate);
+cwEl('rcCancel').onclick=()=>closeModal('cashReconModal');
+cwEl('rcSave').onclick=()=>{
+  const v=cwNum(cwEl('rcCount').value); if(isNaN(v)) return;
+  const diff=Math.round((v-rcBal)*100)/100; if(diff===0) return;
+  const date=cwToday(), r=realNow(), note=cwEl('rcNote').value.trim()||'Cash count adjustment';
+  const cid=ensureCashAccount();
+  const tx = diff>0 ? addIncTransaction(cid,r.year,r.month,'cash_adj_in',diff,note,date)
+                    : addCatTransaction(cid,r.year,r.month,'cash_adj_out',-diff,note,date);
+  tx.kind='adjustment'; saveStateNow();
+  haptic(true); closeModal('cashReconModal'); cwRefresh([cid]);
 };
 
 /* ---------- yearly transactions summary ---------- */
@@ -2915,7 +3151,7 @@ function enableSwipeToDismiss(backdropId){
   }
   handle.addEventListener('pointerdown', onDown);
 }
-['lockModal','settingsModal','incomeSourcesModal','addYearModal','addAccountModal','editAccountModal','accountsListModal'].forEach(enableSwipeToDismiss);
+['lockModal','settingsModal','incomeSourcesModal','addYearModal','addAccountModal','editAccountModal','accountsListModal','cashTxnModal','cashReconModal'].forEach(enableSwipeToDismiss);
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
